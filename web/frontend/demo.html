@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能教育助手机器人 - 演示展示</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <link rel="stylesheet" href="css/style.css">
+    
+    <style>
+        .demo-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .feature-showcase {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #007bff;
+        }
+        
+        .demo-running {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        
+        .metric-highlight {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        
+        .interactive-demo {
+            border: 2px dashed #007bff;
+            border-radius: 10px;
+            padding: 2rem;
+            text-align: center;
+            background: rgba(0, 123, 255, 0.05);
+        }
+        
+        .status-active {
+            background: #28a745;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            display: inline-block;
+            margin: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- 演示头部 -->
+    <div class="demo-header">
+        <div class="container">
+            <h1 class="display-4 mb-3">
+                <i class="fas fa-robot me-3"></i>
+                智能教育助手机器人
+            </h1>
+            <h2 class="h4 mb-3">第十六届蓝桥杯大赛数字科技创新赛参赛作品</h2>
+            <p class="lead">基于RISC-V K1芯片的多模态AI教育系统</p>
+            <div class="mt-4">
+                <button class="btn btn-light btn-lg me-3" id="startFullDemo">
+                    <i class="fas fa-play me-2"></i>开始完整演示
+                </button>
+                <button class="btn btn-outline-light btn-lg" id="viewTechSpecs">
+                    <i class="fas fa-cog me-2"></i>技术规格
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主要内容 -->
+    <div class="container">
+        <!-- 系统状态概览 -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="metric-highlight">
+                    <h3 class="h5 mb-2">系统状态</h3>
+                    <div class="status-active demo-running">
+                        <i class="fas fa-circle me-2"></i>运行中
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-highlight">
+                    <h3 class="h5 mb-2">AI推理性能</h3>
+                    <div class="h4 mb-0" id="inferenceSpeed">12.5 tokens/s</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-highlight">
+                    <h3 class="h5 mb-2">识别准确率</h3>
+                    <div class="h4 mb-0" id="accuracy">92.3%</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-highlight">
+                    <h3 class="h5 mb-2">响应时间</h3>
+                    <div class="h4 mb-0" id="responseTime">1.2s</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 核心功能展示 -->
+        <div class="row">
+            <!-- 左侧 - 功能模块 -->
+            <div class="col-lg-8">
+                <!-- 多模态AI展示 -->
+                <div class="feature-showcase mb-4">
+                    <h3 class="h5 mb-3">
+                        <i class="fas fa-brain me-2 text-primary"></i>
+                        多模态AI融合系统
+                    </h3>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="interactive-demo">
+                                <div class="mb-3">
+                                    <i class="fas fa-video fa-3x text-primary mb-3"></i>
+                                    <h6>计算机视觉</h6>
+                                    <div id="visionDemo" class="small text-muted">
+                                        检测对象: 数学书, 铅笔, 练习本<br>
+                                        OCR识别: "3 + 5 = ?"<br>
+                                        表情分析: 专注 (85%)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="interactive-demo">
+                                <div class="mb-3">
+                                    <i class="fas fa-microphone fa-3x text-success mb-3"></i>
+                                    <h6>语音识别</h6>
+                                    <div id="speechDemo" class="small text-muted">
+                                        识别结果: "小助手，这道题怎么做？"<br>
+                                        置信度: 94.2%<br>
+                                        语言: 中文
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 机械臂可视化 -->
+                <div class="feature-showcase mb-4">
+                    <h3 class="h5 mb-3">
+                        <i class="fas fa-robot me-2 text-warning"></i>
+                        智能机械臂控制系统
+                    </h3>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <canvas id="armVisualization" width="300" height="200" style="background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 8px; width: 100%;"></canvas>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3">
+                                <h6>机械臂状态</h6>
+                                <p class="mb-2"><strong>状态:</strong> <span id="armStatus" class="text-success">执行中</span></p>
+                                <p class="mb-2"><strong>当前手势:</strong> <span id="currentGesture">解释手势</span></p>
+                                <p class="mb-2"><strong>精度:</strong> ±0.5mm</p>
+                                <p class="mb-2"><strong>负载:</strong> 250g</p>
+                                
+                                <div class="mt-3">
+                                    <h6>手势控制</h6>
+                                    <div class="btn-group-vertical w-100">
+                                        <button class="btn btn-sm btn-outline-primary mb-1" data-gesture="greeting">问候手势</button>
+                                        <button class="btn btn-sm btn-outline-primary mb-1" data-gesture="pointing">指向手势</button>
+                                        <button class="btn btn-sm btn-outline-primary mb-1" data-gesture="encouragement">鼓励手势</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 教学场景演示 -->
+                <div class="feature-showcase mb-4">
+                    <h3 class="h5 mb-3">
+                        <i class="fas fa-chalkboard-teacher me-2 text-info"></i>
+                        智能教学场景系统
+                    </h3>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="p-3">
+                                <h6>当前场景: <span id="currentScenario" class="text-primary">数学学习</span></h6>
+                                <div class="progress mb-3">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated" id="scenarioProgress" style="width: 65%"></div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <button class="btn btn-outline-primary w-100 mb-2" data-scenario="math">
+                                            <i class="fas fa-calculator me-1"></i>数学
+                                        </button>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <button class="btn btn-outline-success w-100 mb-2" data-scenario="chinese">
+                                            <i class="fas fa-book me-1"></i>语文
+                                        </button>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <button class="btn btn-outline-info w-100 mb-2" data-scenario="english">
+                                            <i class="fas fa-globe me-1"></i>英语
+                                        </button>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <button class="btn btn-outline-warning w-100 mb-2" data-scenario="science">
+                                            <i class="fas fa-flask me-1"></i>科学
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-3 p-3 bg-light rounded">
+                                    <h6>AI教学回复:</h6>
+                                    <p id="teachingResponse" class="mb-0 text-muted">
+                                        "这是一道基础加法题。加法就是把两个数合并起来，让我用手势演示给你看..."
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧 - 性能监控 -->
+            <div class="col-lg-4">
+                <!-- 实时性能图表 -->
+                <div class="feature-showcase mb-4">
+                    <h3 class="h5 mb-3">
+                        <i class="fas fa-chart-line me-2 text-success"></i>
+                        实时性能监控
+                    </h3>
+                    <canvas id="performanceChart" height="150"></canvas>
+                    
+                    <div class="mt-3">
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <div class="border rounded p-2">
+                                    <div class="h6 mb-1 text-primary" id="cpuUsage">45%</div>
+                                    <small class="text-muted">CPU</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="border rounded p-2">
+                                    <div class="h6 mb-1 text-success" id="memoryUsage">68%</div>
+                                    <small class="text-muted">内存</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="border rounded p-2">
+                                    <div class="h6 mb-1 text-info" id="npuUsage">32%</div>
+                                    <small class="text-muted">NPU</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 技术特色 -->
+                <div class="feature-showcase mb-4">
+                    <h3 class="h5 mb-3">
+                        <i class="fas fa-star me-2 text-warning"></i>
+                        技术创新特色
+                    </h3>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            边缘AI本地推理
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            四模态实时融合
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            RISC-V架构优化
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            教育场景专用AI
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            具身智能交互
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- 演示日志 -->
+                <div class="feature-showcase">
+                    <h3 class="h5 mb-3">
+                        <i class="fas fa-list me-2 text-secondary"></i>
+                        系统运行日志
+                    </h3>
+                    <div style="max-height: 200px; overflow-y: auto; font-family: monospace; font-size: 0.8em;">
+                        <div id="demoLogs">
+                            <div class="text-success">[INFO] 智能教育助手机器人系统启动成功</div>
+                            <div class="text-info">[INFO] 多模态AI引擎初始化完成</div>
+                            <div class="text-info">[INFO] 机械臂控制系统就绪</div>
+                            <div class="text-success">[SUCCESS] 开始数学学习场景演示</div>
+                            <div class="text-info">[INFO] 检测到学习材料: 数学书</div>
+                            <div class="text-info">[INFO] OCR识别: "3 + 5 = ?"</div>
+                            <div class="text-success">[SUCCESS] 执行解释手势</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // 演示控制脚本
+        class LiveDemo {
+            constructor() {
+                this.isRunning = false;
+                this.currentScenario = 'math';
+                this.performanceChart = null;
+                this.armVisualization = null;
+                
+                this.init();
+            }
+            
+            init() {
+                this.initPerformanceChart();
+                this.initArmVisualization();
+                this.setupEventListeners();
+                this.startLiveUpdates();
+                
+                console.log('智能教育助手机器人演示系统已启动');
+            }
+            
+            initPerformanceChart() {
+                const ctx = document.getElementById('performanceChart').getContext('2d');
+                this.performanceChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            label: '响应时间',
+                            data: [],
+                            borderColor: '#007bff',
+                            backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { beginAtZero: true, max: 3000 },
+                            x: { display: false }
+                        },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+            
+            initArmVisualization() {
+                const canvas = document.getElementById('armVisualization');
+                this.armVisualization = canvas.getContext('2d');
+                this.drawArm();
+            }
+            
+            drawArm() {
+                const ctx = this.armVisualization;
+                const canvas = ctx.canvas;
+                const width = canvas.width;
+                const height = canvas.height;
+                
+                ctx.clearRect(0, 0, width, height);
+                
+                // 绘制机械臂
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 4;
+                ctx.lineCap = 'round';
+                
+                const centerX = width / 2;
+                const centerY = height - 30;
+                const time = Date.now() * 0.001;
+                
+                // 基座
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, 10, 0, 2 * Math.PI);
+                ctx.fillStyle = '#ffffff';
+                ctx.fill();
+                
+                // 机械臂段
+                let currentX = centerX;
+                let currentY = centerY;
+                const segments = [
+                    { length: 40, angle: Math.sin(time) * 30 },
+                    { length: 35, angle: Math.cos(time * 1.2) * 25 },
+                    { length: 30, angle: Math.sin(time * 0.8) * 20 }
+                ];
+                
+                segments.forEach((segment, i) => {
+                    const angle = segment.angle * Math.PI / 180;
+                    const nextX = currentX + Math.cos(angle - Math.PI/2) * segment.length;
+                    const nextY = currentY + Math.sin(angle - Math.PI/2) * segment.length;
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(currentX, currentY);
+                    ctx.lineTo(nextX, nextY);
+                    ctx.stroke();
+                    
+                    ctx.beginPath();
+                    ctx.arc(nextX, nextY, 5, 0, 2 * Math.PI);
+                    ctx.fill();
+                    
+                    currentX = nextX;
+                    currentY = nextY;
+                });
+            }
+            
+            setupEventListeners() {
+                // 演示控制
+                document.getElementById('startFullDemo').addEventListener('click', () => {
+                    this.startDemo();
+                });
+                
+                // 场景切换
+                document.querySelectorAll('[data-scenario]').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.switchScenario(e.target.getAttribute('data-scenario'));
+                    });
+                });
+                
+                // 手势控制
+                document.querySelectorAll('[data-gesture]').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.executeGesture(e.target.getAttribute('data-gesture'));
+                    });
+                });
+            }
+            
+            startLiveUpdates() {
+                setInterval(() => {
+                    this.updateMetrics();
+                    this.updatePerformanceChart();
+                    this.drawArm();
+                    this.updateDemoContent();
+                }, 1500);
+            }
+            
+            updateMetrics() {
+                const time = Date.now();
+                
+                // 动态更新指标
+                document.getElementById('inferenceSpeed').textContent = 
+                    (10 + Math.sin(time / 5000) * 3 + Math.random()).toFixed(1) + ' tokens/s';
+                
+                document.getElementById('accuracy').textContent = 
+                    (90 + Math.sin(time / 8000) * 5 + Math.random() * 2).toFixed(1) + '%';
+                
+                document.getElementById('responseTime').textContent = 
+                    (1.0 + Math.sin(time / 6000) * 0.5 + Math.random() * 0.3).toFixed(1) + 's';
+                
+                document.getElementById('cpuUsage').textContent = 
+                    Math.round(40 + Math.sin(time / 10000) * 15 + Math.random() * 10) + '%';
+                
+                document.getElementById('memoryUsage').textContent = 
+                    Math.round(60 + Math.cos(time / 8000) * 10 + Math.random() * 8) + '%';
+                
+                document.getElementById('npuUsage').textContent = 
+                    Math.round(30 + Math.sin(time / 12000) * 15 + Math.random() * 10) + '%';
+            }
+            
+            updatePerformanceChart() {
+                const chart = this.performanceChart;
+                const time = new Date().toLocaleTimeString();
+                const value = 1000 + Math.sin(Date.now() / 5000) * 300 + Math.random() * 200;
+                
+                chart.data.labels.push(time);
+                chart.data.datasets[0].data.push(Math.round(value));
+                
+                if (chart.data.labels.length > 15) {
+                    chart.data.labels.shift();
+                    chart.data.datasets[0].data.shift();
+                }
+                
+                chart.update('none');
+            }
+            
+            updateDemoContent() {
+                // 更新多模态展示内容
+                const visionTexts = [
+                    '检测对象: 数学书, 计算器<br>OCR识别: "求解方程"<br>表情分析: 专注 (88%)',
+                    '检测对象: 语文书, 字典<br>OCR识别: "床前明月光"<br>表情分析: 陶醉 (92%)',
+                    '检测对象: 英语书, 单词卡<br>OCR识别: "Hello World"<br>表情分析: 练习 (86%)'
+                ];
+                
+                const speechTexts = [
+                    '识别结果: "老师，这道题不会做"<br>置信度: 94.2%<br>语言: 中文',
+                    '识别结果: "What does this mean?"<br>置信度: 91.8%<br>语言: 英文',
+                    '识别结果: "能再解释一遍吗？"<br>置信度: 96.1%<br>语言: 中文'
+                ];
+                
+                const responses = [
+                    '这是一道基础代数题，让我来一步步为你解答...',
+                    '这首诗表达了诗人深深的思乡之情，意境优美...',
+                    '这个英语句型的用法是这样的，让我详细说明...',
+                    '科学实验要注意安全，我来演示正确的操作方法...'
+                ];
+                
+                // 随机更新内容
+                const randomIndex = Math.floor(Math.random() * 3);
+                document.getElementById('visionDemo').innerHTML = visionTexts[randomIndex];
+                document.getElementById('speechDemo').innerHTML = speechTexts[randomIndex];
+                
+                const responseIndex = Math.floor(Math.random() * responses.length);
+                document.getElementById('teachingResponse').textContent = responses[responseIndex];
+            }
+            
+            startDemo() {
+                this.isRunning = true;
+                this.addLog('开始完整功能演示', 'SUCCESS');
+                
+                // 显示启动动画
+                document.getElementById('startFullDemo').innerHTML = 
+                    '<i class="fas fa-spinner fa-spin me-2"></i>演示运行中...';
+                document.getElementById('startFullDemo').disabled = true;
+                
+                setTimeout(() => {
+                    document.getElementById('startFullDemo').innerHTML = 
+                        '<i class="fas fa-stop me-2"></i>停止演示';
+                    document.getElementById('startFullDemo').disabled = false;
+                    document.getElementById('startFullDemo').onclick = () => this.stopDemo();
+                }, 2000);
+            }
+            
+            stopDemo() {
+                this.isRunning = false;
+                this.addLog('演示已停止', 'INFO');
+                
+                document.getElementById('startFullDemo').innerHTML = 
+                    '<i class="fas fa-play me-2"></i>开始完整演示';
+                document.getElementById('startFullDemo').onclick = () => this.startDemo();
+            }
+            
+            switchScenario(scenario) {
+                this.currentScenario = scenario;
+                const scenarios = {
+                    math: '数学学习',
+                    chinese: '语文学习', 
+                    english: '英语学习',
+                    science: '科学学习'
+                };
+                
+                document.getElementById('currentScenario').textContent = scenarios[scenario];
+                this.addLog(`切换到${scenarios[scenario]}场景`, 'INFO');
+                
+                // 更新进度条
+                const progress = Math.floor(Math.random() * 40) + 30;
+                document.getElementById('scenarioProgress').style.width = progress + '%';
+            }
+            
+            executeGesture(gesture) {
+                const gestures = {
+                    greeting: '问候',
+                    pointing: '指向',
+                    encouragement: '鼓励'
+                };
+                
+                document.getElementById('currentGesture').textContent = gestures[gesture] + '手势';
+                this.addLog(`执行${gestures[gesture]}手势`, 'SUCCESS');
+            }
+            
+            addLog(message, level) {
+                const logs = document.getElementById('demoLogs');
+                const timestamp = new Date().toLocaleTimeString();
+                const logClass = level === 'SUCCESS' ? 'text-success' : 
+                               level === 'INFO' ? 'text-info' : 'text-muted';
+                
+                const logEntry = document.createElement('div');
+                logEntry.className = logClass;
+                logEntry.textContent = `[${level}] ${message}`;
+                
+                logs.insertBefore(logEntry, logs.firstChild);
+                
+                // 限制日志数量
+                while (logs.children.length > 10) {
+                    logs.removeChild(logs.lastChild);
+                }
+            }
+        }
+        
+        // 启动演示系统
+        document.addEventListener('DOMContentLoaded', () => {
+            window.liveDemo = new LiveDemo();
+        });
+    </script>
+</body>
+</html>

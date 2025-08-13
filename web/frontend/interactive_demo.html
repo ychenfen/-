@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能教育助手机器人 - 详细互动演示</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <!-- 自定义样式 -->
+    <link rel="stylesheet" href="css/interactive-demo.css">
+    
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --info-color: #17a2b8;
+            --secondary-color: #6c757d;
+            --gradient-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --card-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            --border-radius: 12px;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* 页面头部样式 */
+        .demo-header {
+            background: var(--gradient-bg);
+            color: white;
+            padding: 2rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .demo-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="white" opacity="0.1"/><circle cx="80" cy="40" r="3" fill="white" opacity="0.1"/><circle cx="40" cy="80" r="1" fill="white" opacity="0.1"/></svg>');
+            animation: float 6s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .demo-title {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* 卡片样式增强 */
+        .demo-card {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            border: none;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .demo-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .demo-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--gradient-bg);
+        }
+
+        /* 状态指示器 */
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin: 0.2rem;
+            transition: all 0.3s ease;
+        }
+
+        .status-running {
+            background: linear-gradient(45deg, var(--success-color), #20c997);
+            color: white;
+            animation: pulse-glow 2s infinite;
+        }
+
+        .status-idle {
+            background: linear-gradient(45deg, var(--secondary-color), #9ca2a8);
+            color: white;
+        }
+
+        .status-processing {
+            background: linear-gradient(45deg, var(--info-color), #20a7c6);
+            color: white;
+            animation: processing 1.5s infinite;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(40, 167, 69, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(40, 167, 69, 0.8); }
+        }
+
+        @keyframes processing {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* 视频流容器 */
+        .video-container {
+            position: relative;
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            aspect-ratio: 16/9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .video-placeholder {
+            text-align: center;
+            color: white;
+            position: relative;
+            z-index: 2;
+        }
+
+        .detection-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        /* 机械臂可视化增强 */
+        .arm-container {
+            background: var(--gradient-bg);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .arm-canvas {
+            width: 100%;
+            height: 250px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+        }
+
+        /* 多模态面板增强 */
+        .modality-panel {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            height: 160px;
+            border-left: 4px solid;
+            position: relative;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .modality-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 60px;
+            height: 60px;
+            opacity: 0.1;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .modality-speech {
+            border-left-color: var(--primary-color);
+        }
+
+        .modality-speech::before {
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="%23007bff" viewBox="0 0 24 24"><path d="M12 1c-4.97 0-9 4.03-9 9v7c0 1.66 1.34 3 3 3h3v-8H5v-2c0-3.87 3.13-7 7-7s7 3.13 7 7v2h-4v8h3c1.66 0 3-1.34 3-3v-7c0-4.97-4.03-9-9-9z"/></svg>');
+        }
+
+        .modality-vision {
+            border-left-color: var(--success-color);
+        }
+
+        .modality-vision::before {
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="%2328a745" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>');
+        }
+
+        .modality-ai {
+            border-left-color: var(--info-color);
+        }
+
+        .modality-ai::before {
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="%2317a2b8" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 12h-2v-2h2v2zm0-4h-2V6h2v4z"/></svg>');
+        }
+
+        .modality-fusion {
+            border-left-color: var(--warning-color);
+        }
+
+        .modality-fusion::before {
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="%23ffc107" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>');
+        }
+
+        /* 控制按钮增强 */
+        .control-btn {
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .control-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .control-btn:hover::before {
+            left: 100%;
+        }
+
+        .control-btn.active {
+            transform: scale(0.95);
+            box-shadow: inset 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        /* 性能图表容器 */
+        .chart-container {
+            position: relative;
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            box-shadow: var(--card-shadow);
+        }
+
+        /* 日志容器增强 */
+        .log-container {
+            max-height: 300px;
+            overflow-y: auto;
+            background: #1e1e1e;
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+
+        .log-entry {
+            display: flex;
+            align-items: flex-start;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            animation: fadeInUp 0.3s ease;
+        }
+
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+
+        .log-time {
+            color: #888;
+            margin-right: 1rem;
+            font-size: 0.8em;
+            white-space: nowrap;
+            min-width: 80px;
+        }
+
+        .log-level {
+            margin-right: 1rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7em;
+            font-weight: bold;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .log-info { background: var(--info-color); color: white; }
+        .log-success { background: var(--success-color); color: white; }
+        .log-warning { background: var(--warning-color); color: black; }
+        .log-error { background: var(--danger-color); color: white; }
+
+        .log-message {
+            flex: 1;
+            color: #fff;
+            line-height: 1.4;
+        }
+
+        /* 指标卡片 */
+        .metric-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--gradient-bg);
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: var(--gradient-bg);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-label {
+            color: var(--secondary-color);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.9rem;
+        }
+
+        /* 响应式优化 */
+        @media (max-width: 768px) {
+            .demo-header {
+                padding: 1.5rem 0;
+            }
+            
+            .modality-panel {
+                height: auto;
+                min-height: 120px;
+                margin-bottom: 1rem;
+            }
+            
+            .metric-value {
+                font-size: 2rem;
+            }
+            
+            .control-btn {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+        }
+
+        /* 动画效果 */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 0.6s ease;
+        }
+
+        .slide-in-right {
+            animation: slideInRight 0.6s ease;
+        }
+
+        /* 进度条增强 */
+        .progress-enhanced {
+            height: 8px;
+            border-radius: 10px;
+            background: rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .progress-bar-enhanced {
+            background: var(--gradient-bg);
+            border-radius: 10px;
+            transition: width 0.8s ease;
+            position: relative;
+        }
+
+        .progress-bar-enhanced::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* 工具提示增强 */
+        .tooltip-enhanced {
+            position: relative;
+            cursor: help;
+        }
+
+        .tooltip-enhanced::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .tooltip-enhanced:hover::after {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(-5px);
+        }
+    </style>
+</head>
+<body>
+    <!-- 页面头部 -->
+    <div class="demo-header">
+        <div class="container">
+            <div class="demo-title text-center">
+                <h1 class="display-4 mb-3 animate__animated animate__fadeInDown">
+                    <i class="fas fa-robot me-3"></i>
+                    智能教育助手机器人
+                </h1>
+                <h2 class="h4 mb-3 animate__animated animate__fadeInDown animate__delay-1s">
+                    第十六届蓝桥杯大赛数字科技创新赛参赛作品
+                </h2>
+                <p class="lead mb-4 animate__animated animate__fadeInUp animate__delay-2s">
+                    基于RISC-V K1芯片的多模态AI教育系统 - 详细互动演示
+                </p>
+                <div class="animate__animated animate__fadeInUp animate__delay-3s">
+                    <button class="btn btn-light btn-lg me-3 control-btn" id="masterControlBtn">
+                        <i class="fas fa-play me-2"></i>启动主控演示
+                    </button>
+                    <button class="btn btn-outline-light btn-lg control-btn" id="systemStatusBtn">
+                        <i class="fas fa-info-circle me-2"></i>系统状态
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主要内容区域 -->
+    <div class="container mt-4">
+        <!-- 系统状态概览 -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="demo-card animate__animated animate__fadeInUp">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="fas fa-tachometer-alt me-2 text-primary"></i>
+                            系统运行状态
+                        </h5>
+                        <div class="row text-center">
+                            <div class="col-md-2">
+                                <div class="status-indicator status-running" id="systemStatus">
+                                    <i class="fas fa-circle me-2"></i>系统运行中
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="tooltip-enhanced" data-tooltip="AI推理引擎状态">
+                                    <div class="status-indicator status-processing" id="aiStatus">
+                                        <i class="fas fa-brain me-2"></i>AI推理中
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="tooltip-enhanced" data-tooltip="机械臂控制状态">
+                                    <div class="status-indicator status-idle" id="armStatus">
+                                        <i class="fas fa-robot me-2"></i>待机中
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="tooltip-enhanced" data-tooltip="多模态融合状态">
+                                    <div class="status-indicator status-processing" id="fusionStatus">
+                                        <i class="fas fa-project-diagram me-2"></i>融合处理
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="tooltip-enhanced" data-tooltip="学习场景状态">
+                                    <div class="status-indicator status-running" id="sceneStatus">
+                                        <i class="fas fa-chalkboard-teacher me-2"></i>教学中
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="tooltip-enhanced" data-tooltip="最后更新时间">
+                                    <small class="text-muted d-block">最后更新</small>
+                                    <strong id="lastUpdate">--:--:--</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 核心功能展示区域 -->
+        <div class="row">
+            <!-- 左侧主展示区 -->
+            <div class="col-lg-8">
+                <!-- 实时视频流和检测展示 -->
+                <div class="demo-card mb-4 animate__animated animate__fadeInLeft">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-video me-2 text-success"></i>
+                                实时视觉感知系统
+                            </h5>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-success control-btn" id="startVisionBtn">
+                                    <i class="fas fa-play"></i> 启动
+                                </button>
+                                <button class="btn btn-outline-secondary control-btn" id="pauseVisionBtn">
+                                    <i class="fas fa-pause"></i> 暂停
+                                </button>
+                                <button class="btn btn-outline-info control-btn" id="captureBtn">
+                                    <i class="fas fa-camera"></i> 截图
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="video-container">
+                                    <div class="video-placeholder">
+                                        <i class="fas fa-video fa-4x mb-3" id="videoIcon"></i>
+                                        <h6 id="videoStatus">模拟摄像头画面</h6>
+                                        <p class="small text-muted" id="videoInfo">分辨率: 1280x720 | 帧率: 30fps</p>
+                                    </div>
+                                    <canvas class="detection-overlay" id="detectionCanvas" width="640" height="360"></canvas>
+                                </div>
+                                
+                                <!-- 检测结果显示 -->
+                                <div class="mt-3">
+                                    <div class="row">
+                                        <div class="col-4">
+                                            <div class="text-center p-2 bg-light rounded">
+                                                <div class="h6 mb-1 text-primary" id="detectedObjects">0</div>
+                                                <small class="text-muted">检测对象</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="text-center p-2 bg-light rounded">
+                                                <div class="h6 mb-1 text-success" id="ocrTexts">0</div>
+                                                <small class="text-muted">识别文字</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="text-center p-2 bg-light rounded">
+                                                <div class="h6 mb-1 text-info" id="faceCount">0</div>
+                                                <small class="text-muted">人脸检测</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="h6 mb-3">实时检测结果</div>
+                                <div id="detectionResults" class="small" style="max-height: 200px; overflow-y: auto;">
+                                    <div class="mb-2 p-2 bg-light rounded">
+                                        <strong>等待检测启动...</strong>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-3">
+                                    <div class="h6 mb-2">检测设置</div>
+                                    <div class="mb-2">
+                                        <label class="form-label small">置信度阈值</label>
+                                        <input type="range" class="form-range" id="confidenceSlider" min="0.3" max="0.9" step="0.1" value="0.5">
+                                        <div class="d-flex justify-content-between">
+                                            <small>0.3</small>
+                                            <small id="confidenceValue">0.5</small>
+                                            <small>0.9</small>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="enableOCR" checked>
+                                        <label class="form-check-label small" for="enableOCR">启用OCR识别</label>
+                                    </div>
+                                    
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="enableFace" checked>
+                                        <label class="form-check-label small" for="enableFace">启用人脸检测</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 多模态AI融合展示 -->
+                <div class="demo-card mb-4 animate__animated animate__fadeInLeft animate__delay-1s">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="fas fa-brain me-2 text-primary"></i>
+                            多模态AI融合系统
+                        </h5>
+                        
+                        <div class="row">
+                            <!-- 语音识别模块 -->
+                            <div class="col-md-3">
+                                <div class="modality-panel modality-speech">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fas fa-microphone text-primary me-2"></i>
+                                        <h6 class="mb-0">语音识别</h6>
+                                    </div>
+                                    <div class="mb-2">
+                                        <div class="small text-muted">识别内容:</div>
+                                        <div id="speechText" class="fw-bold" style="min-height: 40px;">等待语音输入...</div>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <small class="text-muted">置信度:</small>
+                                            <span id="speechConfidence" class="fw-bold text-primary">--</span>
+                                        </div>
+                                        <div>
+                                            <small class="text-muted">语言:</small>
+                                            <span id="speechLanguage" class="fw-bold">中文</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 视觉识别模块 -->
+                            <div class="col-md-3">
+                                <div class="modality-panel modality-vision">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fas fa-eye text-success me-2"></i>
+                                        <h6 class="mb-0">视觉识别</h6>
+                                    </div>
+                                    <div class="mb-2">
+                                        <div class="small text-muted">检测结果:</div>
+                                        <div id="visionResults" style="min-height: 40px; font-size: 0.85em;">
+                                            <div>对象: 无</div>
+                                            <div>文字: 无</div>
+                                            <div>表情: 平静</div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <small class="text-muted">处理时间:</small>
+                                        <span id="visionTime" class="fw-bold text-success">--ms</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- AI推理模块 -->
+                            <div class="col-md-3">
+                                <div class="modality-panel modality-ai">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fas fa-robot text-info me-2"></i>
+                                        <h6 class="mb-0">AI推理</h6>
+                                    </div>
+                                    <div class="mb-2">
+                                        <div class="small text-muted">生成回复:</div>
+                                        <div id="aiResponse" style="min-height: 40px; font-size: 0.85em;">等待交互...</div>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <small class="text-muted">用时:</small>
+                                            <span id="aiResponseTime" class="fw-bold text-info">--s</span>
+                                        </div>
+                                        <div>
+                                            <small class="text-muted">模型:</small>
+                                            <span class="fw-bold">Qwen1.5</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 融合决策模块 -->
+                            <div class="col-md-3">
+                                <div class="modality-panel modality-fusion">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fas fa-project-diagram text-warning me-2"></i>
+                                        <h6 class="mb-0">融合决策</h6>
+                                    </div>
+                                    <div class="mb-2">
+                                        <div class="small text-muted">决策结果:</div>
+                                        <div id="fusionResult" style="min-height: 40px; font-size: 0.85em;">
+                                            <div>意图: 无</div>
+                                            <div>置信度: --</div>
+                                            <div>动作: 待机</div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <small class="text-muted">融合策略:</small>
+                                        <span class="fw-bold text-warning">加权平均</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 融合权重控制 -->
+                        <div class="mt-4">
+                            <h6 class="mb-3">模态权重控制</h6>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label class="form-label small">视觉权重</label>
+                                    <input type="range" class="form-range" id="visionWeight" min="0" max="1" step="0.1" value="0.3">
+                                    <div class="text-center small" id="visionWeightValue">30%</div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label small">语音权重</label>
+                                    <input type="range" class="form-range" id="audioWeight" min="0" max="1" step="0.1" value="0.4">
+                                    <div class="text-center small" id="audioWeightValue">40%</div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label small">文本权重</label>
+                                    <input type="range" class="form-range" id="textWeight" min="0" max="1" step="0.1" value="0.3">
+                                    <div class="text-center small" id="textWeightValue">30%</div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="d-grid">
+                                        <button class="btn btn-sm btn-outline-primary" id="resetWeights">
+                                            <i class="fas fa-undo me-1"></i>重置权重
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 智能机械臂控制展示 -->
+                <div class="demo-card mb-4 animate__animated animate__fadeInLeft animate__delay-2s">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="fas fa-robot me-2 text-warning"></i>
+                            智能机械臂控制系统
+                        </h5>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="arm-container">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h6 class="mb-0 text-white">机械臂可视化</h6>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-light btn-sm" id="armHomeBtn">
+                                                <i class="fas fa-home"></i> 归零
+                                            </button>
+                                            <button class="btn btn-outline-light btn-sm" id="armCalibrateBtn">
+                                                <i class="fas fa-crosshairs"></i> 校准
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <canvas class="arm-canvas" id="armCanvas" width="400" height="250"></canvas>
+                                    
+                                    <div class="mt-3 text-white">
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <small>当前状态: </small>
+                                                <span id="armCurrentStatus" class="fw-bold">待机中</span>
+                                            </div>
+                                            <div class="col-6">
+                                                <small>当前手势: </small>
+                                                <span id="armCurrentGesture" class="fw-bold">无</span>
+                                            </div>
+                                        </div>
+                                        <div class="row mt-1">
+                                            <div class="col-6">
+                                                <small>精度: </small>
+                                                <span class="fw-bold">±0.5mm</span>
+                                            </div>
+                                            <div class="col-6">
+                                                <small>负载: </small>
+                                                <span class="fw-bold">250g</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="h6 mb-3">关节控制面板</div>
+                                
+                                <!-- 关节角度控制 -->
+                                <div class="mb-3">
+                                    <div class="row">
+                                        <div class="col-4">
+                                            <label class="form-label small">J1 (基座)</label>
+                                            <input type="range" class="form-range" id="joint1" min="-165" max="165" value="0">
+                                            <div class="text-center small" id="joint1Value">0°</div>
+                                        </div>
+                                        <div class="col-4">
+                                            <label class="form-label small">J2 (肩部)</label>
+                                            <input type="range" class="form-range" id="joint2" min="-165" max="165" value="0">
+                                            <div class="text-center small" id="joint2Value">0°</div>
+                                        </div>
+                                        <div class="col-4">
+                                            <label class="form-label small">J3 (肘部)</label>
+                                            <input type="range" class="form-range" id="joint3" min="-165" max="165" value="0">
+                                            <div class="text-center small" id="joint3Value">0°</div>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-2">
+                                        <div class="col-4">
+                                            <label class="form-label small">J4 (腕1)</label>
+                                            <input type="range" class="form-range" id="joint4" min="-165" max="165" value="0">
+                                            <div class="text-center small" id="joint4Value">0°</div>
+                                        </div>
+                                        <div class="col-4">
+                                            <label class="form-label small">J5 (腕2)</label>
+                                            <input type="range" class="form-range" id="joint5" min="-165" max="165" value="0">
+                                            <div class="text-center small" id="joint5Value">0°</div>
+                                        </div>
+                                        <div class="col-4">
+                                            <label class="form-label small">J6 (腕3)</label>
+                                            <input type="range" class="form-range" id="joint6" min="-175" max="175" value="0">
+                                            <div class="text-center small" id="joint6Value">0°</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- 预设手势按钮 -->
+                                <div class="h6 mb-2">教育手势库</div>
+                                <div class="row">
+                                    <div class="col-6 mb-2">
+                                        <button class="btn btn-outline-primary btn-sm w-100 control-btn" data-gesture="greeting">
+                                            <i class="fas fa-hand-wave me-1"></i>问候手势
+                                        </button>
+                                    </div>
+                                    <div class="col-6 mb-2">
+                                        <button class="btn btn-outline-success btn-sm w-100 control-btn" data-gesture="pointing">
+                                            <i class="fas fa-hand-point-up me-1"></i>指向手势
+                                        </button>
+                                    </div>
+                                    <div class="col-6 mb-2">
+                                        <button class="btn btn-outline-info btn-sm w-100 control-btn" data-gesture="encouragement">
+                                            <i class="fas fa-thumbs-up me-1"></i>鼓励手势
+                                        </button>
+                                    </div>
+                                    <div class="col-6 mb-2">
+                                        <button class="btn btn-outline-warning btn-sm w-100 control-btn" data-gesture="thinking">
+                                            <i class="fas fa-brain me-1"></i>思考手势
+                                        </button>
+                                    </div>
+                                    <div class="col-6 mb-2">
+                                        <button class="btn btn-outline-secondary btn-sm w-100 control-btn" data-gesture="explanation">
+                                            <i class="fas fa-hands me-1"></i>解释手势
+                                        </button>
+                                    </div>
+                                    <div class="col-6 mb-2">
+                                        <button class="btn btn-outline-danger btn-sm w-100 control-btn" data-gesture="counting">
+                                            <i class="fas fa-hand-fingers me-1"></i>数数手势
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- 运动参数控制 -->
+                                <div class="mt-3">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <label class="form-label small">运动速度</label>
+                                            <input type="range" class="form-range" id="armSpeed" min="10" max="100" value="50">
+                                            <div class="text-center small" id="armSpeedValue">50%</div>
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label small">平滑度</label>
+                                            <input type="range" class="form-range" id="armSmooth" min="1" max="10" value="5">
+                                            <div class="text-center small" id="armSmoothValue">5</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 教学场景演示 -->
+                <div class="demo-card animate__animated animate__fadeInLeft animate__delay-3s">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="fas fa-chalkboard-teacher me-2 text-info"></i>
+                            智能教学场景系统
+                        </h5>
+                        
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h6>当前教学场景</h6>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-success btn-sm control-btn" id="startScenarioBtn">
+                                                <i class="fas fa-play"></i> 开始
+                                            </button>
+                                            <button class="btn btn-outline-warning btn-sm control-btn" id="pauseScenarioBtn">
+                                                <i class="fas fa-pause"></i> 暂停
+                                            </button>
+                                            <button class="btn btn-outline-danger btn-sm control-btn" id="stopScenarioBtn">
+                                                <i class="fas fa-stop"></i> 停止
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="p-3 bg-light rounded">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <h6 class="mb-0">场景: <span id="currentScenarioName" class="text-primary">数学学习</span></h6>
+                                            <span class="badge bg-success" id="scenarioProgress">进行中</span>
+                                        </div>
+                                        <div class="progress-enhanced mb-2">
+                                            <div class="progress-bar-enhanced" id="scenarioProgressBar" style="width: 0%"></div>
+                                        </div>
+                                        <div class="small text-muted">
+                                            步骤 <span id="currentStep">1</span> / <span id="totalSteps">5</span>: 
+                                            <span id="currentStepDesc">初始化教学环境</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- 场景选择 -->
+                                <div class="row mb-3">
+                                    <div class="col-3">
+                                        <button class="btn btn-outline-primary w-100 control-btn scenario-btn" data-scenario="math">
+                                            <i class="fas fa-calculator d-block mb-1"></i>
+                                            <small>数学学习</small>
+                                        </button>
+                                    </div>
+                                    <div class="col-3">
+                                        <button class="btn btn-outline-success w-100 control-btn scenario-btn" data-scenario="chinese">
+                                            <i class="fas fa-book d-block mb-1"></i>
+                                            <small>语文学习</small>
+                                        </button>
+                                    </div>
+                                    <div class="col-3">
+                                        <button class="btn btn-outline-info w-100 control-btn scenario-btn" data-scenario="english">
+                                            <i class="fas fa-globe d-block mb-1"></i>
+                                            <small>英语学习</small>
+                                        </button>
+                                    </div>
+                                    <div class="col-3">
+                                        <button class="btn btn-outline-warning w-100 control-btn scenario-btn" data-scenario="science">
+                                            <i class="fas fa-flask d-block mb-1"></i>
+                                            <small>科学实验</small>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- AI教学回复展示 -->
+                                <div class="p-3 border rounded">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fas fa-robot text-info me-2"></i>
+                                        <h6 class="mb-0">AI教学助手回复</h6>
+                                        <div class="ms-auto">
+                                            <small class="text-muted">生成时间: </small>
+                                            <span id="teachingResponseTime" class="fw-bold">--s</span>
+                                        </div>
+                                    </div>
+                                    <div id="teachingResponse" class="mb-2" style="min-height: 60px;">
+                                        欢迎来到智能教学系统！我是您的AI学习助手，准备好开始我们的学习之旅了吗？
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <small class="text-muted">置信度: <span id="teachingConfidence">95.2%</span></small>
+                                        <small class="text-muted">情感倾向: <span id="teachingEmotion">友好鼓励</span></small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="h6 mb-3">场景配置</div>
+                                
+                                <!-- 教学难度设置 -->
+                                <div class="mb-3">
+                                    <label class="form-label small">教学难度</label>
+                                    <select class="form-select form-select-sm" id="difficultySelect">
+                                        <option value="easy">简单 (小学)</option>
+                                        <option value="medium" selected>中等 (初中)</option>
+                                        <option value="hard">困难 (高中)</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- 教学模式设置 -->
+                                <div class="mb-3">
+                                    <label class="form-label small">教学模式</label>
+                                    <div class="btn-group-vertical d-grid gap-1">
+                                        <input type="radio" class="btn-check" name="teachingMode" id="modeExplain" value="explain" checked>
+                                        <label class="btn btn-outline-primary btn-sm" for="modeExplain">
+                                            <i class="fas fa-chalkboard-teacher me-1"></i>讲解模式
+                                        </label>
+                                        
+                                        <input type="radio" class="btn-check" name="teachingMode" id="modeInteractive" value="interactive">
+                                        <label class="btn btn-outline-success btn-sm" for="modeInteractive">
+                                            <i class="fas fa-comments me-1"></i>互动模式
+                                        </label>
+                                        
+                                        <input type="radio" class="btn-check" name="teachingMode" id="modePractice" value="practice">
+                                        <label class="btn btn-outline-info btn-sm" for="modePractice">
+                                            <i class="fas fa-pencil-alt me-1"></i>练习模式
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <!-- 个性化设置 -->
+                                <div class="mb-3">
+                                    <label class="form-label small">个性化选项</label>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="enableGesture" checked>
+                                        <label class="form-check-label small" for="enableGesture">启用手势演示</label>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="enableVoice" checked>
+                                        <label class="form-check-label small" for="enableVoice">启用语音合成</label>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="enableAdaptive" checked>
+                                        <label class="form-check-label small" for="enableAdaptive">自适应难度</label>
+                                    </div>
+                                </div>
+                                
+                                <!-- 快速测试 -->
+                                <div>
+                                    <label class="form-label small">快速测试</label>
+                                    <div class="input-group input-group-sm mb-2">
+                                        <input type="text" class="form-control" id="quickTestInput" placeholder="输入问题...">
+                                        <button class="btn btn-outline-secondary" id="quickTestBtn">
+                                            <i class="fas fa-paper-plane"></i>
+                                        </button>
+                                    </div>
+                                    <button class="btn btn-outline-info btn-sm w-100" id="generateQuestionBtn">
+                                        <i class="fas fa-random me-1"></i>随机生成问题
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧监控面板 -->
+            <div class="col-lg-4">
+                <!-- 系统性能监控 -->
+                <div class="demo-card mb-4 animate__animated animate__fadeInRight">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="fas fa-chart-line me-2 text-success"></i>
+                            系统性能监控
+                        </h5>
+                        
+                        <!-- 核心指标 -->
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <div class="metric-card">
+                                    <div class="metric-value" id="mainCpuUsage">45</div>
+                                    <div class="metric-label">CPU使用率 (%)</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="metric-card">
+                                    <div class="metric-value" id="mainMemoryUsage">68</div>
+                                    <div class="metric-label">内存使用率 (%)</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <div class="metric-card">
+                                    <div class="metric-value" id="mainNpuUsage">32</div>
+                                    <div class="metric-label">NPU使用率 (%)</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="metric-card">
+                                    <div class="metric-value" id="mainResponseTime">1.2</div>
+                                    <div class="metric-label">响应时间 (s)</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 实时性能图表 -->
+                        <div class="chart-container">
+                            <canvas id="performanceChart" height="120"></canvas>
+                        </div>
+                        
+                        <!-- AI模型性能 -->
+                        <div class="mt-3">
+                            <h6 class="mb-2">AI模型性能</h6>
+                            <div class="row">
+                                <div class="col-4 text-center">
+                                    <div class="small text-muted">语音识别</div>
+                                    <div class="h6 text-primary" id="speechAccuracyMain">87%</div>
+                                </div>
+                                <div class="col-4 text-center">
+                                    <div class="small text-muted">视觉识别</div>
+                                    <div class="h6 text-success" id="visionAccuracyMain">92%</div>
+                                </div>
+                                <div class="col-4 text-center">
+                                    <div class="small text-muted">LLM推理</div>
+                                    <div class="h6 text-info" id="llmSpeedMain">12.5</div>
+                                    <div class="small text-muted">tokens/s</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 语音交互测试 -->
+                <div class="demo-card mb-4 animate__animated animate__fadeInRight animate__delay-1s">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="fas fa-microphone me-2 text-primary"></i>
+                            语音交互测试
+                        </h5>
+                        
+                        <!-- 语音输入区域 -->
+                        <div class="mb-3">
+                            <label class="form-label small">语音合成测试</label>
+                            <div class="input-group mb-2">
+                                <input type="text" class="form-control" id="ttsInput" placeholder="输入要合成的文字..." value="欢迎使用智能教育助手！">
+                                <button class="btn btn-outline-primary control-btn" id="ttsPlayBtn">
+                                    <i class="fas fa-play"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-6">
+                                    <label class="form-label small">语速</label>
+                                    <input type="range" class="form-range" id="ttsSpeed" min="0.5" max="2" step="0.1" value="1">
+                                    <div class="text-center small" id="ttsSpeedValue">1.0x</div>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small">音量</label>
+                                    <input type="range" class="form-range" id="ttsVolume" min="0" max="1" step="0.1" value="0.8">
+                                    <div class="text-center small" id="ttsVolumeValue">80%</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 模拟语音识别 -->
+                        <div class="mb-3">
+                            <label class="form-label small">模拟语音识别</label>
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-outline-success btn-sm control-btn" data-speech="小助手你好！">
+                                    <i class="fas fa-microphone me-1"></i>"小助手你好！"
+                                </button>
+                                <button class="btn btn-outline-info btn-sm control-btn" data-speech="这道数学题怎么做？">
+                                    <i class="fas fa-microphone me-1"></i>"这道数学题怎么做？"
+                                </button>
+                                <button class="btn btn-outline-warning btn-sm control-btn" data-speech="能再解释一遍吗？">
+                                    <i class="fas fa-microphone me-1"></i>"能再解释一遍吗？"
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- 语音状态显示 -->
+                        <div class="p-3 bg-light rounded">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <small class="text-muted">语音状态</small>
+                                <span class="badge bg-secondary" id="voiceStatus">待机</span>
+                            </div>
+                            <div class="small">
+                                <div>最后识别: <span id="lastRecognized">无</span></div>
+                                <div>置信度: <span id="lastConfidence">--</span></div>
+                                <div>处理时间: <span id="lastProcessTime">--ms</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 系统日志 -->
+                <div class="demo-card animate__animated animate__fadeInRight animate__delay-2s">
+                    <div class="card-body p-0">
+                        <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">
+                                <i class="fas fa-list-alt me-2 text-secondary"></i>
+                                系统运行日志
+                            </h5>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-secondary btn-sm" id="exportLogsBtn" title="导出日志">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                                <button class="btn btn-outline-secondary btn-sm" id="clearLogsBtn" title="清空日志">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                                <button class="btn btn-outline-secondary btn-sm" id="pauseLogsBtn" title="暂停日志">
+                                    <i class="fas fa-pause"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="log-container" id="systemLogs">
+                            <!-- 日志条目将动态添加到这里 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页面底部 -->
+    <footer class="mt-5 py-4 bg-dark text-white">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>智能教育助手机器人</h6>
+                    <p class="small mb-0">第十六届蓝桥杯大赛数字科技创新赛参赛作品</p>
+                    <p class="small">基于RISC-V K1芯片的多模态AI教育系统</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <div class="mb-2">
+                        <span class="badge bg-primary me-2">RISC-V K1</span>
+                        <span class="badge bg-success me-2">多模态AI</span>
+                        <span class="badge bg-info me-2">边缘计算</span>
+                        <span class="badge bg-warning">智能教育</span>
+                    </div>
+                    <p class="small mb-0">© 2024 蓝桥杯参赛团队</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- 主要JavaScript代码 -->
+    <script>
+        // 详细的JavaScript实现将在下一部分提供
+        console.log('智能教育助手机器人详细互动演示系统加载中...');
+    </script>
+    
+    <!-- 包含主要功能的JavaScript文件 -->
+    <script src="js/interactive-demo-engine.js"></script>
+</body>
+</html>

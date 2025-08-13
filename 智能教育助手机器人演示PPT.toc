@@ -1,0 +1,8 @@
+\beamer@sectionintoc {1}{项目概述}{3}{0}{1}
+\beamer@sectionintoc {2}{系统架构设计}{6}{0}{2}
+\beamer@sectionintoc {3}{关键技术实现}{8}{0}{3}
+\beamer@sectionintoc {4}{系统功能展示}{11}{0}{4}
+\beamer@sectionintoc {5}{性能测试与评估}{14}{0}{5}
+\beamer@sectionintoc {6}{创新特色与优势}{16}{0}{6}
+\beamer@sectionintoc {7}{实施方案与前景}{18}{0}{7}
+\beamer@sectionintoc {8}{总结与展望}{20}{0}{8}

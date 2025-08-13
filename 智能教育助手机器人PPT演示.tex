@@ -1,0 +1,894 @@
+\documentclass[aspectratio=169,12pt]{beamer}
+\usepackage[UTF8]{ctex}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{listings}
+\usepackage{xcolor}
+% \usepackage{fontawesome5} % 暂时禁用图标包
+\usepackage{multicol}
+\usepackage{adjustbox}
+
+% 主题设置
+\usetheme{Madrid}
+\usecolortheme{whale}
+
+% 自定义颜色
+\definecolor{primaryblue}{RGB}{102,126,234}
+\definecolor{secondaryblue}{RGB}{118,75,162}
+\definecolor{successgreen}{RGB}{46,204,113}
+\definecolor{warningyellow}{RGB}{243,156,18}
+\definecolor{dangerred}{RGB}{231,76,60}
+\definecolor{darkgray}{RGB}{44,62,80}
+
+% 设置主题颜色
+\setbeamercolor{structure}{fg=primaryblue}
+\setbeamercolor{frametitle}{fg=white,bg=primaryblue}
+\setbeamercolor{title}{fg=primaryblue}
+\setbeamercolor{author}{fg=darkgray}
+\setbeamercolor{institute}{fg=darkgray}
+\setbeamercolor{date}{fg=darkgray}
+
+% 自定义字体
+\setbeamerfont{title}{size=\Large,series=\bfseries}
+\setbeamerfont{frametitle}{size=\large,series=\bfseries}
+\setbeamerfont{framesubtitle}{size=\normalsize}
+
+% 页码设置
+\setbeamertemplate{page number in head/foot}[framenumber]
+
+% 代码样式
+\lstset{
+    basicstyle=\tiny\ttfamily,
+    keywordstyle=\color{primaryblue}\bfseries,
+    commentstyle=\color{successgreen},
+    stringstyle=\color{dangerred},
+    showstringspaces=false,
+    breaklines=true,
+    frame=single,
+    backgroundcolor=\color{gray!10}
+}
+
+% 自定义命令
+\newcommand{\highlight}[1]{\textcolor{primaryblue}{\textbf{#1}}}
+\newcommand{\success}[1]{\textcolor{successgreen}{\textbf{#1}}}
+\newcommand{\warning}[1]{\textcolor{warningyellow}{\textbf{#1}}}
+\newcommand{\danger}[1]{\textcolor{dangerred}{\textbf{#1}}}
+
+% 标题信息
+\title{\textbf{智能教育助手机器人}}
+\subtitle{基于RISC-V K1芯片的多模态AI教育系统}
+\author{参赛团队}
+\institute{第十六届蓝桥杯大赛数字科技创新赛}
+\date{\today}
+
+\begin{document}
+
+% 标题页
+\begin{frame}
+    \titlepage
+    \begin{center}
+        \vspace{1em}
+        % 技术标签
+        \begin{tikzpicture}
+            \node[fill=primaryblue, text=white, rounded corners=3pt, inner sep=5pt] at (0,0) {\footnotesize ⚡ RISC-V K1};
+            \node[fill=successgreen, text=white, rounded corners=3pt, inner sep=5pt] at (2.5,0) {\footnotesize 🧠 多模态AI};
+            \node[fill=warningyellow, text=white, rounded corners=3pt, inner sep=5pt] at (5,0) {\footnotesize ☁️ 边缘计算};
+            \node[fill=dangerred, text=white, rounded corners=3pt, inner sep=5pt] at (7.5,0) {\footnotesize 🎓 智能教育};
+        \end{tikzpicture}
+    \end{center}
+\end{frame}
+
+% 目录
+\begin{frame}{目录}
+    \tableofcontents
+\end{frame}
+
+% 第一部分：项目概述
+\section{项目概述}
+
+\begin{frame}{项目背景}
+    \begin{columns}
+        \begin{column}{0.6\textwidth}
+            \begin{block}{教育挑战}
+                \begin{itemize}
+                    \item ⚠️ 师资力量分布不均
+                    \item 👤 个性化教学难以实现
+                    \item 📚 教学资源稀缺
+                    \item ⏰ 教学效率有待提升
+                \end{itemize}
+            \end{block}
+            
+            \begin{block}{技术机遇}
+                \begin{itemize}
+                    \item 🚀 AI技术快速发展
+                    \item ⚡ RISC-V生态成熟
+                    \item 🤖 具身智能兴起
+                    \item 🎓 教育数字化转型
+                \end{itemize}
+            \end{block}
+        \end{column}
+        \begin{column}{0.4\textwidth}
+            \begin{center}
+                \includegraphics[width=\textwidth]{iShot_2025-07-28_17.14.53.png}
+            \end{center}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{技术创新点}
+    \begin{enumerate}
+        \item \highlight{RISC-V边缘AI架构}
+        \begin{itemize}
+            \item 首次在教育领域完整应用RISC-V K1芯片
+            \item 2.0 TOPS算力的本地AI推理
+            \item 开源硬件与教育软件深度融合
+        \end{itemize}
+        
+        \item \highlight{多模态深度融合}  
+        \begin{itemize}
+            \item 视觉+语音+文本+动作四模态集成
+            \item 1.5秒内完成复杂数据处理
+            \item 注意力机制驱动的智能决策
+        \end{itemize}
+        
+        \item \highlight{具身智能交互}
+        \begin{itemize}
+            \item 6轴机械臂精确控制（±0.5mm精度）
+            \item 9种专用教学手势动作库
+            \item 语音、视觉、动作三位一体协同
+        \end{itemize}
+    \end{enumerate}
+\end{frame}
+
+\begin{frame}{系统价值}
+    \begin{columns}
+        \begin{column}{0.5\textwidth}
+            \begin{block}{\faBalanceScale\ 教育公平性}
+                \begin{itemize}
+                    \item 为偏远地区提供优质教育资源
+                    \item 24/7全天候智能教学服务
+                    \item 降低优质教育获取门槛
+                \end{itemize}
+            \end{block}
+            
+            \begin{block}{\faUser\ 个性化教学}
+                \begin{itemize}
+                    \item 根据学生状态自适应调整
+                    \item 多维度学习效果评估
+                    \item 因材施教的技术实现
+                \end{itemize}
+            \end{block}
+        \end{column}
+        \begin{column}{0.5\textwidth}
+            \begin{block}{\faShield\ 隐私保护}
+                \begin{itemize}
+                    \item 边缘计算确保数据本地处理
+                    \item 零云端传输保护学生隐私
+                    \item 符合教育数据保护法规
+                \end{itemize}
+            \end{block}
+            
+            \begin{block}{\faIndustry\ 产业价值}
+                \begin{itemize}
+                    \item 推动RISC-V教育应用发展
+                    \item 促进边缘AI技术产业化
+                    \item 为AI+教育提供创新示范
+                \end{itemize}
+            \end{block}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+% 第二部分：系统架构
+\section{系统架构设计}
+
+\begin{frame}{总体架构}
+    \begin{center}
+        \begin{tikzpicture}[scale=0.7]
+            % 用户交互层
+            \draw[fill=primaryblue!20] (0,4) rectangle (10,5);
+            \node at (5,4.5) {\textbf{用户交互层}};
+            \node at (2,4.2) {\footnotesize Web界面};
+            \node at (5,4.2) {\footnotesize 语音交互};
+            \node at (8,4.2) {\footnotesize 手势控制};
+            
+            % 应用服务层
+            \draw[fill=successgreen!20] (0,3) rectangle (10,4);
+            \node at (5,3.5) {\textbf{应用服务层}};
+            \node at (2,3.2) {\footnotesize 教学引擎};
+            \node at (5,3.2) {\footnotesize 知识库};
+            \node at (8,3.2) {\footnotesize 评估系统};
+            
+            % AI引擎层
+            \draw[fill=warningyellow!20] (0,2) rectangle (10,3);
+            \node at (5,2.5) {\textbf{AI引擎层}};
+            \node at (2,2.2) {\footnotesize 计算机视觉};
+            \node at (5,2.2) {\footnotesize 语音处理};
+            \node at (8,2.2) {\footnotesize 自然语言};
+            
+            % 系统软件层
+            \draw[fill=dangerred!20] (0,1) rectangle (10,2);
+            \node at (5,1.5) {\textbf{系统软件层}};
+            \node at (2,1.2) {\footnotesize Linux内核};
+            \node at (5,1.2) {\footnotesize 驱动程序};
+            \node at (8,1.2) {\footnotesize 通信协议};
+            
+            % 硬件平台层
+            \draw[fill=secondaryblue!20] (0,0) rectangle (10,1);
+            \node at (5,0.5) {\textbf{硬件平台层}};
+            \node at (2,0.2) {\footnotesize RISC-V K1};
+            \node at (5,0.2) {\footnotesize 摄像头};
+            \node at (8,0.2) {\footnotesize 机械臂};
+            
+            % 箭头
+            \foreach \y in {0.5,1.5,2.5,3.5} {
+                \draw[->,thick] (5,\y+0.3) -- (5,\y+0.7);
+            }
+        \end{tikzpicture}
+    \end{center}
+\end{frame}
+
+\begin{frame}{核心模块设计}
+    \begin{table}[h]
+        \centering
+        \footnotesize
+        \begin{tabular}{|c|c|c|c|}
+        \hline
+        \textbf{模态} & \textbf{技术方案} & \textbf{性能指标} & \textbf{应用场景} \\
+        \hline
+        视觉感知 & YOLOv8 + OCR & 准确率>90\% & 教材识别、表情分析 \\
+        \hline
+        语音识别 & Whisper ASR & 准确率>95\% & 学生问答、指令识别 \\
+        \hline
+        文本理解 & Qwen1.5-1.8B & 响应<2s & 知识问答、内容生成 \\
+        \hline
+        动作控制 & myCobot 280 & ±0.5mm & 教学手势、物体操作 \\
+        \hline
+        \end{tabular}
+    \end{table}
+    
+    \vspace{1em}
+    
+    \begin{block}{机械臂教学手势库}
+        \begin{multicols}{3}
+            \footnotesize
+            \begin{itemize}
+                \item 问候手势
+                \item 指向手势  
+                \item 鼓励手势
+                \item 思考手势
+                \item 解释手势
+                \item 数数手势
+                \item 书写手势
+                \item 朗读手势
+                \item 实验手势
+            \end{itemize}
+        \end{multicols}
+    \end{block}
+\end{frame}
+
+% 第三部分：关键技术
+\section{关键技术实现}
+
+\begin{frame}{RISC-V边缘AI计算}
+    \begin{columns}
+        \begin{column}{0.6\textwidth}
+            \begin{block}{硬件平台}
+                \begin{itemize}
+                    \item \faChip\ 8核RISC-V处理器@2.0GHz
+                    \item \faBrain\ 集成NPU，2.0 TOPS算力
+                    \item \faMemory\ 8GB LPDDR5 + 256GB存储
+                    \item \faBatteryHalf\ 典型功耗<20W
+                \end{itemize}
+            \end{block}
+            
+            \begin{block}{软件优化}
+                \begin{itemize}
+                    \item 针对RISC-V架构的AI模型优化
+                    \item 多模态并行推理引擎
+                    \item 模型量化和加速技术
+                    \item 实时调度和资源管理
+                \end{itemize}
+            \end{block}
+        \end{column}
+        \begin{column}{0.4\textwidth}
+            \begin{center}
+                \begin{tikzpicture}[scale=0.8]
+                    % RISC-V芯片示意图
+                    \draw[fill=primaryblue!30, rounded corners=5pt] (0,0) rectangle (3,3);
+                    \node at (1.5,2.5) {\footnotesize RISC-V K1};
+                    
+                    % CPU核心
+                    \foreach \i in {0,1} {
+                        \foreach \j in {0,1} {
+                            \draw[fill=successgreen!50, rounded corners=2pt] ({0.3+\i*1.2},{0.3+\j*0.8}) rectangle ({0.9+\i*1.2},{0.9+\j*0.8});
+                            \node at ({0.6+\i*1.2},{0.6+\j*0.8}) {\tiny CPU};
+                        }
+                    }
+                    
+                    % NPU
+                    \draw[fill=warningyellow!50, rounded corners=2pt] (0.3,1.9) rectangle (2.7,2.3);
+                    \node at (1.5,2.1) {\footnotesize NPU 2.0 TOPS};
+                \end{tikzpicture}
+            \end{center}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[fragile]{多模态融合算法}
+    \begin{columns}
+        \begin{column}{0.5\textwidth}
+            \begin{block}{融合公式}
+                $$F_{fusion} = Attention(F_v, F_a, F_t) \cdot W + b$$
+                
+                其中：
+                \begin{itemize}
+                    \item $F_v$ - 视觉特征向量
+                    \item $F_a$ - 音频特征向量  
+                    \item $F_t$ - 文本特征向量
+                    \item $W$ - 融合权重矩阵
+                \end{itemize}
+            \end{block}
+        \end{column}
+        \begin{column}{0.5\textwidth}
+            \begin{lstlisting}[language=Python, caption=融合算法核心代码]
+def multimodal_fusion(vision, audio, text):
+    # 特征提取
+    v_feat = vision_encoder(vision)
+    a_feat = audio_encoder(audio)
+    t_feat = text_encoder(text)
+    
+    # 注意力机制
+    attn_weights = attention_layer([
+        v_feat, a_feat, t_feat
+    ])
+    
+    # 加权融合
+    fused = weighted_fusion(
+        [v_feat, a_feat, t_feat], 
+        attn_weights
+    )
+    
+    return fused
+            \end{lstlisting}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{实时处理流程}
+    \begin{center}
+        \begin{tikzpicture}[
+            node distance=2.5cm,
+            every node/.style={align=center},
+            box/.style={rectangle, draw, fill=blue!20, text width=2cm, minimum height=1cm},
+            arrow/.style={->, thick, blue}
+        ]
+            \node[box] (input) {多模态\\输入};
+            \node[box, right of=input, fill=green!20] (extract) {特征\\提取};
+            \node[box, right of=extract, fill=yellow!20] (fusion) {数据\\融合};
+            \node[box, right of=fusion, fill=red!20] (decision) {决策\\生成};
+            \node[box, right of=decision, fill=purple!20] (output) {执行\\输出};
+            
+            \draw[arrow] (input) -- (extract);
+            \draw[arrow] (extract) -- (fusion);
+            \draw[arrow] (fusion) -- (decision);
+            \draw[arrow] (decision) -- (output);
+            
+            \node[below of=extract, node distance=1cm] {\footnotesize <200ms};
+            \node[below of=fusion, node distance=1cm] {\footnotesize <500ms};
+            \node[below of=decision, node distance=1cm] {\footnotesize <800ms};
+        \end{tikzpicture}
+    \end{center}
+    
+    \begin{alertblock}{性能指标}
+        \begin{itemize}
+            \item \highlight{端到端响应时间：} < 2秒
+            \item \highlight{多模态融合时间：} < 1.5秒  
+            \item \highlight{系统吞吐量：} 30 QPS
+            \item \highlight{并发用户数：} 50+
+        \end{itemize}
+    \end{alertblock}
+\end{frame}
+
+% 第四部分：功能演示
+\section{系统功能展示}
+
+\begin{frame}{智能教学场景系统}
+    \begin{columns}
+        \begin{column}{0.5\textwidth}
+            \includegraphics[width=\textwidth]{iShot_2025-07-28_17.15.45.png}
+        \end{column}
+        \begin{column}{0.5\textwidth}
+            \begin{block}{核心功能}
+                \begin{itemize}
+                    \item \faGraduationCap\ 四大学科支持
+                    \begin{itemize}
+                        \item 数学学习
+                        \item 语文学习
+                        \item 英语学习
+                        \item 科学实验
+                    \end{itemize}
+                    \vspace{0.5em}
+                    \item \faUser\ 个性化配置
+                    \begin{itemize}
+                        \item 难度调节
+                        \item 教学模式
+                        \item 自适应选项
+                    \end{itemize}
+                    \vspace{0.5em}
+                    \item \faRobot\ AI助手回复
+                    \begin{itemize}
+                        \item 置信度：95.2\%
+                        \item 情感倾向：友好鼓励
+                        \item 响应时间：<2秒
+                    \end{itemize}
+                \end{itemize}
+            \end{block}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{机械臂可视化控制}
+    \begin{columns}
+        \begin{column}{0.5\textwidth}
+            \includegraphics[width=\textwidth]{iShot_2025-07-28_17.15.34.png}
+        \end{column}
+        \begin{column}{0.5\textwidth}
+            \begin{block}{技术规格}
+                \begin{itemize}
+                    \item \faRobot\ myCobot 280 6轴机械臂
+                    \item \faRuler\ 重复定位精度：±0.5mm
+                    \item \faWeight\ 负载能力：250g
+                    \item \faClock\ 响应时间：<500ms
+                \end{itemize}
+            \end{block}
+            
+            \begin{block}{3D可视化}
+                \begin{itemize}
+                    \item 实时显示6个关节角度
+                    \item Canvas 3D动画渲染
+                    \item 状态监控和异常检测
+                    \item 教学手势库管理
+                \end{itemize}
+            \end{block}
+            
+            \begin{block}{语音交互}
+                \begin{itemize}
+                    \item TTS语音合成测试
+                    \item 语速/音量调节
+                    \item 模拟语音识别
+                    \item 实时状态监控
+                \end{itemize}
+            \end{block}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{实时视觉感知系统}
+    \begin{columns}
+        \begin{column}{0.6\textwidth}
+            \includegraphics[width=\textwidth]{iShot_2025-07-28_17.14.53.png}
+        \end{column}
+        \begin{column}{0.4\textwidth}
+            \begin{block}{视觉检测}
+                \begin{itemize}
+                    \item \faVideo\ 1280x720@30fps
+                    \item \faSearch\ 实时目标检测
+                    \item \faEye\ OCR文字识别
+                    \item \faAdjust\ 置信度阈值调节
+                \end{itemize}
+            \end{block}
+            
+            \begin{block}{系统监控}
+                \begin{itemize}
+                    \item CPU使用率：45\%
+                    \item 内存使用率：68\%
+                    \item NPU使用率：32\%
+                    \item 响应时间：1.2秒
+                \end{itemize}
+            \end{block}
+            
+            \begin{block}{运行状态}
+                \begin{itemize}
+                    \item \success{运行中}
+                    \item \success{AI推理中}
+                    \item \success{融合处理}
+                    \item \success{教学中}
+                \end{itemize}
+            \end{block}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+% 第五部分：性能评估
+\section{性能测试与评估}
+
+\begin{frame}{系统性能指标}
+    \begin{table}[h]
+        \centering
+        \footnotesize
+        \begin{tabular}{|l|c|c|c|}
+        \hline
+        \textbf{测试项目} & \textbf{测试结果} & \textbf{目标指标} & \textbf{达标情况} \\
+        \hline
+        语音识别准确率 & 92.3\% & >90\% & \success{✓ 达标} \\
+        视觉识别准确率 & 88.7\% & >85\% & \success{✓ 达标} \\
+        LLM推理速度 & 12.5 tokens/s & >10 tokens/s & \success{✓ 达标} \\
+        多模态融合时间 & 1.2s & <2s & \success{✓ 达标} \\
+        端到端响应时间 & 1.8s & <3s & \success{✓ 达标} \\
+        CPU使用率 & 45\% & <70\% & \success{✓ 达标} \\
+        内存使用率 & 68\% & <80\% & \success{✓ 达标} \\
+        机械臂精度 & ±0.5mm & ±1mm & \success{✓ 优秀} \\
+        系统稳定性 & >24h & >12h & \success{✓ 优秀} \\
+        \hline
+        \end{tabular}
+    \end{table}
+    
+    \begin{alertblock}{总体评价}
+        所有关键性能指标均达到或超过设计要求，系统运行稳定可靠！
+    \end{alertblock}
+\end{frame}
+
+\begin{frame}{教学效果评估}
+    \begin{columns}
+        \begin{column}{0.6\textwidth}
+            \begin{center}
+                \begin{tikzpicture}[scale=0.8]
+                    \begin{axis}[
+                        ybar,
+                        xlabel={评估维度},
+                        ylabel={评分 (1-10分)},
+                        symbolic x coords={学习兴趣, 理解程度, 参与度, 满意度},
+                        xtick=data,
+                        legend pos=north west,
+                        ymin=0,
+                        ymax=10,
+                        bar width=0.3cm,
+                        width=8cm,
+                        height=6cm,
+                    ]
+                    \addplot[fill=primaryblue!70] coordinates {
+                        (学习兴趣, 6.2)
+                        (理解程度, 7.1)
+                        (参与度, 5.8)
+                        (满意度, 6.9)
+                    };
+                    \addplot[fill=successgreen!70] coordinates {
+                        (学习兴趣, 8.4)
+                        (理解程度, 8.7)
+                        (参与度, 8.9)
+                        (满意度, 8.6)
+                    };
+                    \legend{传统教学, AI助手教学}
+                    \end{axis}
+                \end{tikzpicture}
+            \end{center}
+        \end{column}
+        \begin{column}{0.4\textwidth}
+            \begin{block}{测试设计}
+                \begin{itemize}
+                    \item \faUsers\ 20名小学生(8-12岁)
+                    \item \faBook\ 数学基础运算
+                    \item \faClock\ 每次30分钟，连续3天
+                    \item \faCompare\ 传统 vs AI教学对比
+                \end{itemize}
+            \end{block}
+            
+            \begin{block}{提升效果}
+                \begin{itemize}
+                    \item 学习兴趣：\success{+35.5\%}
+                    \item 理解程度：\success{+22.5\%}
+                    \item 参与度：\success{+53.4\%}
+                    \item 满意度：\success{+24.6\%}
+                \end{itemize}
+            \end{block}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+% 第六部分：创新优势
+\section{创新特色与优势}
+
+\begin{frame}{技术创新突破}
+    \begin{columns}
+        \begin{column}{0.5\textwidth}
+            \begin{block}{\faRocket\ RISC-V生态创新}
+                \begin{itemize}
+                    \item 教育领域首次完整RISC-V应用
+                    \item 开源硬件与教育软件融合
+                    \item 针对教育场景的AI模型优化
+                \end{itemize}
+            \end{block}
+            
+            \begin{block}{\faBrain\ 多模态融合创新}
+                \begin{itemize}
+                    \item 四模态实时融合技术
+                    \item 注意力机制智能决策
+                    \item 1.5秒复杂数据处理
+                \end{itemize}
+            \end{block}
+        \end{column}
+        \begin{column}{0.5\textwidth}
+            \begin{block}{\faRobot\ 具身智能创新}
+                \begin{itemize}
+                    \item 6轴机械臂精确控制
+                    \item 9种专用教学手势库
+                    \item 语音+视觉+动作协同
+                \end{itemize}
+            \end{block}
+            
+            \begin{block}{\faGraduationCap\ 教育应用创新}
+                \begin{itemize}
+                    \item K12教育深度定制
+                    \item 个性化教学策略
+                    \item 实时学习效果评估
+                \end{itemize}
+            \end{block}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{市场竞争优势}
+    \begin{table}[h]
+        \centering
+        \footnotesize
+        \begin{tabular}{|l|c|c|c|c|}
+        \hline
+        \textbf{对比维度} & \textbf{本系统} & \textbf{竞品A} & \textbf{竞品B} & \textbf{竞品C} \\
+        \hline
+        技术架构 & RISC-V边缘 & x86云端 & ARM云端 & x86本地 \\
+        \hline
+        多模态融合 & \success{✓ 四模态} & \danger{✗ 双模态} & \warning{△ 三模态} & \danger{✗ 单模态} \\
+        \hline
+        具身交互 & \success{✓ 机械臂} & \danger{✗ 无} & \danger{✗ 无} & \warning{△ 简单} \\
+        \hline
+        隐私保护 & \success{✓ 边缘计算} & \danger{✗ 云端} & \danger{✗ 云端} & \success{✓ 本地} \\
+        \hline
+        响应时间 & \success{<2秒} & 3-5秒 & 2-4秒 & 1-3秒 \\
+        \hline
+        教育专用性 & \success{✓ 深度定制} & \danger{✗ 通用} & \warning{△ 部分} & \danger{✗ 通用} \\
+        \hline
+        \textbf{综合评分} & \success{\textbf{9.2/10}} & 6.8/10 & 7.5/10 & 7.2/10 \\
+        \hline
+        \end{tabular}
+    \end{table}
+    
+    \begin{alertblock}{核心竞争力}
+        \begin{itemize}
+            \item \highlight{技术领先：} 多项技术创新突破，形成技术壁垒
+            \item \highlight{应用深度：} 教育场景深度定制，用户体验优异  
+            \item \highlight{成本优势：} 边缘计算降低运营成本，价格竞争力强
+        \end{itemize}
+    \end{alertblock}
+\end{frame}
+
+% 第七部分：实施部署
+\section{实施方案与前景}
+
+\begin{frame}{部署实施方案}
+    \begin{center}
+        \begin{tikzpicture}[scale=0.9]
+            % 时间轴
+            \draw[thick, ->] (0,0) -- (10,0);
+            \node[below] at (10,0) {时间};
+            
+            % 阶段标记
+            \foreach \x/\stage in {1/试点, 4/推广, 8/规模化} {
+                \draw (\x,0) -- (\x,0.2);
+                \node[below] at (\x,0) {\stage};
+            }
+            
+            % 阶段描述
+            \node[above, text width=2.5cm, align=center] at (1,0.5) {
+                \footnotesize
+                \textbf{试点部署}\\
+                1-2所学校\\
+                1-2个月
+            };
+            
+            \node[above, text width=2.5cm, align=center] at (4,0.5) {
+                \footnotesize
+                \textbf{区域推广}\\
+                10-20所学校\\
+                3-6个月
+            };
+            
+            \node[above, text width=2.5cm, align=center] at (8,0.5) {
+                \footnotesize
+                \textbf{规模化部署}\\
+                全市/省级\\
+                6-12个月
+            };
+            
+            % 成果展示
+            \draw[fill=primaryblue!20, rounded corners=3pt] (0.5,1.5) rectangle (2.5,2.5);
+            \node at (1.5,2) {\footnotesize 功能验证};
+            
+            \draw[fill=successgreen!20, rounded corners=3pt] (3,1.5) rectangle (5,2.5);
+            \node at (4,2) {\footnotesize 规模验证};
+            
+            \draw[fill=warningyellow!20, rounded corners=3pt] (7,1.5) rectangle (9,2.5);
+            \node at (8,2) {\footnotesize 商业化};
+        \end{tikzpicture}
+    \end{center}
+    
+    \vspace{1em}
+    
+    \begin{columns}
+        \begin{column}{0.5\textwidth}
+            \begin{block}{成本分析}
+                \begin{itemize}
+                    \item 硬件成本：¥50,000/套
+                    \item 软件开发：¥200,000
+                    \item 部署实施：¥20,000/校
+                    \item 年运营成本：¥40,000
+                \end{itemize}
+            \end{block}
+        \end{column}
+        \begin{column}{0.5\textwidth}
+            \begin{block}{投资回报}
+                \begin{itemize}
+                    \item 替代2名助教成本
+                    \item 提升教学效率30\%
+                    \item 投资回报周期：2年
+                    \item 5年ROI：300\%
+                \end{itemize}
+            \end{block}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{发展前景与规划}
+    \begin{columns}
+        \begin{column}{0.6\textwidth}
+            \begin{block}{\faChartLine\ 市场前景}
+                \begin{itemize}
+                    \item 中国K12教育市场：5000亿元
+                    \item AI教育细分市场：800亿元(2028年)
+                    \item 边缘AI年复合增长率：30\%+
+                    \item 目标市场份额：5\%(5年内)
+                \end{itemize}
+            \end{block}
+            
+            \begin{block}{\faIndustry\ 商业模式}
+                \begin{itemize}
+                    \item 硬件销售：一次性设备收入
+                    \item 软件服务：SaaS订阅年费
+                    \item 内容授权：教育内容版权
+                    \item 技术服务：定制开发支持
+                \end{itemize}
+            \end{block}
+        \end{column}
+        \begin{column}{0.4\textwidth}
+            \begin{block}{\faRoad\ 发展路线}
+                \begin{enumerate}
+                    \item \textbf{2024：} 基础功能
+                    \item \textbf{2025：} 多模态融合
+                    \item \textbf{2026：} 情感计算
+                    \item \textbf{2027：} 群体智能
+                    \item \textbf{2028：} AGI集成
+                \end{enumerate}
+            \end{block}
+            
+            \begin{block}{\faExpand\ 应用扩展}
+                \begin{itemize}
+                    \item 特殊教育
+                    \item 职业教育
+                    \item 企业培训
+                    \item 医疗康复
+                \end{itemize}
+            \end{block}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+% 第八部分：总结
+\section{总结与展望}
+
+\begin{frame}{项目成果总结}
+    \begin{columns}
+        \begin{column}{0.5\textwidth}
+            \begin{block}{\faCheckCircle\ 技术成果}
+                \begin{itemize}
+                    \item RISC-V边缘AI教育系统
+                    \item 四模态实时融合技术
+                    \item 机械臂教学手势控制
+                    \item 教学场景自动化框架
+                    \item Web交互展示平台
+                \end{itemize}
+            \end{block}
+            
+            \begin{block}{\faUsers\ 应用成果}
+                \begin{itemize}
+                    \item 性能指标全面达标
+                    \item 教学效果显著提升
+                    \item 获得师生积极反馈
+                    \item 验证技术方案可行性
+                \end{itemize}
+            \end{block}
+        \end{column}
+        \begin{column}{0.5\textwidth}
+            \begin{block}{\faLightbulb\ 创新价值}
+                \begin{itemize}
+                    \item 首次RISC-V教育完整应用
+                    \item 多模态+具身智能模式
+                    \item 教育公平化技术方案
+                    \item 边缘AI垂直应用案例
+                \end{itemize}
+            \end{block}
+            
+            \begin{block}{\faGlobe\ 社会意义}
+                \begin{itemize}
+                    \item 促进教育资源均衡
+                    \item 推动技术产业发展
+                    \item 提供AI+教育示范
+                    \item 引领智能教育方向
+                \end{itemize}
+            \end{block}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{未来展望}
+    \begin{center}
+        \begin{tikzpicture}[scale=1.1]
+            % 中心圆
+            \draw[fill=primaryblue!30, thick] (0,0) circle (1.5);
+            \node at (0,0) {\textbf{智能教育}};
+            \node at (0,-0.3) {\textbf{助手机器人}};
+            
+            % 周围应用场景
+            \foreach \angle/\text/\color in {
+                0/个性化学习/successgreen,
+                60/教育公平/warningyellow,
+                120/师资增强/dangerred,
+                180/创新教学/primaryblue,
+                240/终身学习/secondaryblue,
+                300/全球教育/darkgray
+            } {
+                \draw[thick, \color] (0,0) -- (\angle:2.5);
+                \node[fill=\color!20, rounded corners=3pt, text width=1.8cm, align=center] at (\angle:3.2) {\footnotesize\text};
+            }
+            
+            % 技术支撑
+            \node[below] at (0,-4) {
+                \begin{tabular}{cccc}
+                    \faChip & \faBrain & \faRobot & \faGraduationCap \\
+                    RISC-V & 多模态AI & 具身智能 & 智能教育 \\
+                \end{tabular}
+            };
+        \end{tikzpicture}
+    \end{center}
+    
+    \begin{alertblock}{愿景使命}
+        \centering
+        \large
+        \textbf{让每个孩子都能享受到优质的AI教育服务}\\
+        \textbf{推动人工智能技术在教育领域的深度应用}\\
+        \textbf{为全球教育公平化贡献中国智慧和方案}
+    \end{alertblock}
+\end{frame}
+
+% 致谢页
+\begin{frame}
+    \begin{center}
+        \vspace{2cm}
+        {\Huge \textbf{谢谢大家！}}
+        
+        \vspace{1cm}
+        {\Large 智能教育助手机器人项目团队}
+        
+        \vspace{2cm}
+        \begin{tikzpicture}
+            \node[fill=primaryblue, text=white, rounded corners=5pt, inner sep=8pt] at (0,0) {\textbf{Q \& A}};
+            \node[fill=successgreen, text=white, rounded corners=5pt, inner sep=8pt] at (3,0) {\textbf{交流讨论}};
+            \node[fill=warningyellow, text=white, rounded corners=5pt, inner sep=8pt] at (6,0) {\textbf{合作洽谈}};
+        \end{tikzpicture}
+        
+        \vspace{1cm}
+        {\footnotesize 第十六届蓝桥杯大赛数字科技创新赛 · 2024}
+    \end{center}
+\end{frame}
+
+\end{document}

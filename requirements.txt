@@ -1,0 +1,45 @@
+# Core dependencies
+opencv-python==4.8.1.78
+numpy==1.24.3
+torch==2.0.1
+onnxruntime==1.15.1
+transformers==4.30.2
+
+# Computer Vision
+ultralytics==8.0.175
+paddlepaddle==2.5.1
+paddleocr==2.7.0.3
+
+# Audio Processing
+pyaudio==0.2.11
+librosa==0.10.1
+whisper==1.1.10
+pyttsx3==2.90
+
+# Language Model
+sentence-transformers==2.2.2
+chromadb==0.4.6
+langchain==0.0.267
+
+# ROS2 and Communication
+rclpy==3.3.7
+geometry-msgs
+std-msgs
+sensor-msgs
+
+# Hardware Control
+pyserial==3.5
+RPi.GPIO==0.7.1
+adafruit-circuitpython-motor==3.4.8
+
+# Utilities
+pyyaml==6.0.1
+requests==2.31.0
+pillow==10.0.0
+matplotlib==3.7.2
+tqdm==4.65.0
+
+# Development
+pytest==7.4.0
+black==23.7.0
+flake8==6.0.0

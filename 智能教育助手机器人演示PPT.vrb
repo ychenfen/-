@@ -1,0 +1,38 @@
+\frametitle{多模态融合算法}
+\begin{columns}
+        \begin{column}{0.5\textwidth}
+            \begin{block}{融合公式}
+                $$F_{fusion} = Attention(F_v, F_a, F_t) \cdot W + b$$
+
+                其中：
+                \begin{itemize}
+                    \item $F_v$ - 视觉特征向量
+                    \item $F_a$ - 音频特征向量
+                    \item $F_t$ - 文本特征向量
+                    \item $W$ - 融合权重矩阵
+                \end{itemize}
+            \end{block}
+        \end{column}
+        \begin{column}{0.5\textwidth}
+            \begin{lstlisting}[language=Python, caption=融合算法核心代码]
+def multimodal_fusion(vision, audio, text):
+    # 特征提取
+    v_feat = vision_encoder(vision)
+    a_feat = audio_encoder(audio)
+    t_feat = text_encoder(text)
+
+    # 注意力机制
+    attn_weights = attention_layer([
+        v_feat, a_feat, t_feat
+    ])
+
+    # 加权融合
+    fused = weighted_fusion(
+        [v_feat, a_feat, t_feat],
+        attn_weights
+    )
+
+    return fused
+            \end{lstlisting}
+        \end{column}
+    \end{columns}

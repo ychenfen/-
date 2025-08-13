@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能教育助手机器人 - 展示平台</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Socket.IO -->
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+    
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-robot me-2"></i>
+                智能教育助手机器人 - 蓝桥杯展示平台
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#dashboard">
+                            <i class="fas fa-tachometer-alt me-1"></i>控制台
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#demo">
+                            <i class="fas fa-play-circle me-1"></i>实时演示
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#control">
+                            <i class="fas fa-gamepad me-1"></i>交互控制
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#analytics">
+                            <i class="fas fa-chart-line me-1"></i>数据分析
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#settings">
+                            <i class="fas fa-cog me-1"></i>系统设置
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容区域 -->
+    <div class="container-fluid mt-3">
+        <!-- 系统状态栏 -->
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body py-2">
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center">
+                                    <div class="status-indicator me-3">
+                                        <span class="badge bg-success" id="systemStatus">
+                                            <i class="fas fa-circle pulse"></i> 系统运行中
+                                        </span>
+                                    </div>
+                                    <small class="text-muted" id="lastUpdate">最后更新: --</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <div class="row">
+                                    <div class="col-3">
+                                        <small class="text-muted d-block">CPU</small>
+                                        <span class="fw-bold" id="cpuUsage">--</span>
+                                    </div>
+                                    <div class="col-3">
+                                        <small class="text-muted d-block">内存</small>
+                                        <span class="fw-bold" id="memoryUsage">--</span>
+                                    </div>
+                                    <div class="col-3">
+                                        <small class="text-muted d-block">响应</small>
+                                        <span class="fw-bold" id="responseTime">--</span>
+                                    </div>
+                                    <div class="col-3">
+                                        <small class="text-muted d-block">连接</small>
+                                        <span class="fw-bold" id="connectionCount">--</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主内容面板 -->
+        <div class="row">
+            <!-- 左侧面板 - 实时展示 -->
+            <div class="col-lg-8">
+                <!-- 视频流和交互区 -->
+                <div class="card shadow-sm mb-3">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-video me-2"></i>实时交互展示
+                        </h5>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-primary" id="startDemo">
+                                <i class="fas fa-play"></i> 开始演示
+                            </button>
+                            <button class="btn btn-outline-secondary" id="pauseDemo">
+                                <i class="fas fa-pause"></i> 暂停
+                            </button>
+                            <button class="btn btn-outline-danger" id="stopDemo">
+                                <i class="fas fa-stop"></i> 停止
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- 摄像头视频流 -->
+                            <div class="col-md-6">
+                                <div class="video-container">
+                                    <video id="cameraFeed" class="img-fluid rounded" autoplay muted>
+                                        <source src="" type="video/mp4">
+                                        您的浏览器不支持视频播放
+                                    </video>
+                                    <canvas id="detectionOverlay" class="detection-overlay"></canvas>
+                                    <div class="video-status">
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-circle pulse"></i> 实时检测
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 机械臂状态可视化 -->
+                            <div class="col-md-6">
+                                <div class="arm-visualization">
+                                    <div class="arm-status mb-2">
+                                        <h6>机械臂状态</h6>
+                                        <div class="d-flex justify-content-between">
+                                            <span class="badge bg-info" id="armStatus">待机中</span>
+                                            <small class="text-muted" id="armPosition">位置: [0,0,0,0,0,0]</small>
+                                        </div>
+                                    </div>
+                                    <canvas id="armVisualization" width="300" height="200"></canvas>
+                                    <div class="mt-2">
+                                        <small class="text-muted">当前动作: </small>
+                                        <span id="currentGesture" class="fw-bold">无</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 多模态信息展示 -->
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-brain me-2"></i>多模态AI处理
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- 语音识别 -->
+                            <div class="col-md-3">
+                                <div class="modality-panel">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fas fa-microphone text-primary me-2"></i>
+                                        <h6 class="mb-0">语音识别</h6>
+                                    </div>
+                                    <div class="recognition-text" id="speechText">
+                                        等待语音输入...
+                                    </div>
+                                    <div class="mt-2">
+                                        <small class="text-muted">置信度: </small>
+                                        <span id="speechConfidence" class="fw-bold">--</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 视觉识别 -->
+                            <div class="col-md-3">
+                                <div class="modality-panel">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fas fa-eye text-success me-2"></i>
+                                        <h6 class="mb-0">视觉识别</h6>
+                                    </div>
+                                    <div class="detection-results" id="visionResults">
+                                        <div class="small">检测对象: 无</div>
+                                        <div class="small">OCR文字: 无</div>
+                                        <div class="small">表情分析: 无</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- AI回复 -->
+                            <div class="col-md-3">
+                                <div class="modality-panel">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fas fa-robot text-info me-2"></i>
+                                        <h6 class="mb-0">AI回复</h6>
+                                    </div>
+                                    <div class="ai-response" id="aiResponse">
+                                        等待交互...
+                                    </div>
+                                    <div class="mt-2">
+                                        <small class="text-muted">生成时间: </small>
+                                        <span id="responseTime" class="fw-bold">--</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 融合结果 -->
+                            <div class="col-md-3">
+                                <div class="modality-panel">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fas fa-project-diagram text-warning me-2"></i>
+                                        <h6 class="mb-0">融合结果</h6>
+                                    </div>
+                                    <div class="fusion-result" id="fusionResult">
+                                        <div class="small">意图: 无</div>
+                                        <div class="small">置信度: --</div>
+                                        <div class="small">动作: 无</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧面板 - 控制和监控 -->
+            <div class="col-lg-4">
+                <!-- 快速控制面板 -->
+                <div class="card shadow-sm mb-3">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-gamepad me-2"></i>快速控制
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- 场景切换 -->
+                        <div class="mb-3">
+                            <label class="form-label">教学场景</label>
+                            <select class="form-select" id="scenarioSelect">
+                                <option value="">选择场景...</option>
+                                <option value="math">数学学习</option>
+                                <option value="chinese">语文学习</option>
+                                <option value="english">英语学习</option>
+                                <option value="science">科学学习</option>
+                                <option value="free">自由对话</option>
+                            </select>
+                        </div>
+                        
+                        <!-- 手势控制 -->
+                        <div class="mb-3">
+                            <label class="form-label">机械臂手势</label>
+                            <div class="btn-group-vertical d-grid gap-1">
+                                <button class="btn btn-sm btn-outline-primary" data-gesture="greeting">问候手势</button>
+                                <button class="btn btn-sm btn-outline-primary" data-gesture="pointing">指向手势</button>
+                                <button class="btn btn-sm btn-outline-primary" data-gesture="encouragement">鼓励手势</button>
+                                <button class="btn btn-sm btn-outline-primary" data-gesture="thinking">思考手势</button>
+                                <button class="btn btn-sm btn-outline-primary" data-gesture="explanation">解释手势</button>
+                            </div>
+                        </div>
+                        
+                        <!-- 语音控制 -->
+                        <div class="mb-3">
+                            <label class="form-label">语音测试</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="testSpeechInput" placeholder="输入测试文本..." value="欢迎使用智能教育助手！">
+                                <button class="btn btn-outline-secondary" id="testSpeechBtn" title="语音合成测试">
+                                    <i class="fas fa-volume-up"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- 快速操作 -->
+                        <div class="mb-3">
+                            <label class="form-label">快速操作</label>
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-sm btn-outline-info" id="askQuestionBtn">
+                                    <i class="fas fa-question-circle me-1"></i>智能问答测试
+                                </button>
+                                <button class="btn btn-sm btn-outline-success" id="startAutoDemo">
+                                    <i class="fas fa-play-circle me-1"></i>自动循环演示
+                                </button>
+                                <button class="btn btn-sm btn-outline-warning" id="settingsBtn">
+                                    <i class="fas fa-cog me-1"></i>系统设置
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 性能监控 -->
+                <div class="card shadow-sm mb-3">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-line me-2"></i>实时性能
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- 响应时间图表 -->
+                        <div class="mb-3">
+                            <canvas id="responseTimeChart" height="100"></canvas>
+                        </div>
+                        
+                        <!-- 准确率图表 -->
+                        <div class="mb-3">
+                            <canvas id="accuracyChart" height="120"></canvas>
+                        </div>
+                        
+                        <!-- 资源使用图表 -->
+                        <div class="mb-3">
+                            <canvas id="resourceChart" height="100"></canvas>
+                        </div>
+                        
+                        <!-- 准确率指标 -->
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="metric-card">
+                                    <div class="metric-value" id="speechAccuracy">--</div>
+                                    <div class="metric-label">语音识别</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="metric-card">
+                                    <div class="metric-value" id="visionAccuracy">--</div>
+                                    <div class="metric-label">视觉识别</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 系统日志 -->
+                <div class="card shadow-sm">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-list-alt me-2"></i>系统日志
+                        </h5>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-secondary" id="exportLogs" title="导出日志">
+                                <i class="fas fa-download"></i>
+                            </button>
+                            <button class="btn btn-outline-secondary" id="clearLogs" title="清空日志">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="log-container" id="systemLogs">
+                            <div class="log-entry">
+                                <span class="log-time">2024-01-20 10:00:00</span>
+                                <span class="log-level log-info">INFO</span>
+                                <span class="log-message">系统启动成功</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 连接状态指示器 -->
+    <div class="connection-indicator" id="connectionIndicator">
+        <i class="fas fa-wifi"></i>
+        <span>连接中...</span>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- 自定义脚本 -->
+    <script src="js/enhanced-demo.js"></script>
+</body>
+</html>

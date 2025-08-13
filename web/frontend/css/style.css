@@ -1,0 +1,403 @@
+/* 智能教育助手机器人 - Web展示平台样式 */
+
+:root {
+    --primary-color: #007bff;
+    --success-color: #28a745;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --info-color: #17a2b8;
+    --light-bg: #f8f9fa;
+    --dark-text: #343a40;
+    --border-radius: 8px;
+    --shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* 全局样式 */
+body {
+    background-color: #f5f6fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow-x: hidden;
+}
+
+.card {
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.card-header {
+    background-color: white;
+    border-bottom: 1px solid #eee;
+    font-weight: 600;
+}
+
+/* 状态指示器 */
+.status-indicator .badge {
+    font-size: 0.85em;
+    padding: 0.5em 0.8em;
+}
+
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+/* 视频容器 */
+.video-container {
+    position: relative;
+    background: #000;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    aspect-ratio: 16/9;
+}
+
+.video-container video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.detection-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.video-status {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 3;
+}
+
+/* 机械臂可视化 */
+.arm-visualization {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: var(--border-radius);
+    padding: 15px;
+    color: white;
+    text-align: center;
+}
+
+.arm-visualization canvas {
+    background: rgba(255,255,255,0.1);
+    border-radius: 4px;
+    width: 100%;
+    max-width: 300px;
+}
+
+/* 模态面板 */
+.modality-panel {
+    background: var(--light-bg);
+    border-radius: var(--border-radius);
+    padding: 15px;
+    height: 120px;
+    border-left: 4px solid var(--primary-color);
+    transition: all 0.3s ease;
+}
+
+.modality-panel:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.recognition-text, .detection-results, .ai-response, .fusion-result {
+    font-size: 0.9em;
+    line-height: 1.4;
+    max-height: 60px;
+    overflow-y: auto;
+}
+
+.detection-results .small, .fusion-result .small {
+    display: block;
+    margin-bottom: 2px;
+}
+
+/* 快速控制面板 */
+.btn[data-gesture] {
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.btn[data-gesture]:hover {
+    transform: translateX(3px);
+}
+
+.btn[data-gesture].active {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+/* 性能指标卡片 */
+.metric-card {
+    text-align: center;
+    padding: 10px;
+    background: white;
+    border-radius: var(--border-radius);
+    border: 1px solid #eee;
+}
+
+.metric-value {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.metric-label {
+    font-size: 0.8em;
+    color: #666;
+    margin-top: 4px;
+}
+
+/* 系统日志 */
+.log-container {
+    max-height: 300px;
+    overflow-y: auto;
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 0.8em;
+}
+
+.log-entry {
+    display: flex;
+    align-items: center;
+    padding: 8px 15px;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.2s ease;
+}
+
+.log-entry:hover {
+    background-color: #f8f9fa;
+}
+
+.log-entry:last-child {
+    border-bottom: none;
+}
+
+.log-time {
+    color: #666;
+    margin-right: 10px;
+    font-size: 0.85em;
+    white-space: nowrap;
+}
+
+.log-level {
+    margin-right: 10px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.75em;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.log-info { background-color: #d1ecf1; color: #0c5460; }
+.log-success { background-color: #d4edda; color: #155724; }
+.log-warning { background-color: #fff3cd; color: #856404; }
+.log-error { background-color: #f8d7da; color: #721c24; }
+
+.log-message {
+    flex: 1;
+    word-break: break-word;
+}
+
+/* 连接状态指示器 */
+.connection-indicator {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--success-color);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 25px;
+    box-shadow: var(--shadow);
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+
+.connection-indicator.disconnected {
+    background: var(--danger-color);
+}
+
+.connection-indicator.connecting {
+    background: var(--warning-color);
+}
+
+.connection-indicator i {
+    margin-right: 8px;
+    animation: spin 2s linear infinite;
+}
+
+.connection-indicator.connected i {
+    animation: none;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .container-fluid {
+        padding: 0 10px;
+    }
+    
+    .card-body {
+        padding: 15px;
+    }
+    
+    .modality-panel {
+        height: auto;
+        min-height: 100px;
+        margin-bottom: 15px;
+    }
+    
+    .video-container {
+        margin-bottom: 15px;
+    }
+    
+    .arm-visualization {
+        margin-top: 15px;
+    }
+    
+    .btn-group-vertical .btn {
+        margin-bottom: 5px;
+    }
+    
+    .metric-card {
+        margin-bottom: 10px;
+    }
+}
+
+@media (max-width: 576px) {
+    .navbar-brand {
+        font-size: 1em;
+    }
+    
+    .card-header h5 {
+        font-size: 1em;
+    }
+    
+    .btn-group .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8em;
+    }
+    
+    .metric-value {
+        font-size: 1.2em;
+    }
+    
+    .log-container {
+        max-height: 200px;
+    }
+}
+
+/* 动画效果 */
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.slide-in {
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from { transform: translateX(-20px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+/* 自定义滚动条 */
+.log-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.log-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.log-container::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 3px;
+}
+
+.log-container::-webkit-scrollbar-thumb:hover {
+    background: #999;
+}
+
+/* 加载指示器 */
+.loading {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0,0,0,0.8);
+    color: white;
+    padding: 20px 30px;
+    border-radius: var(--border-radius);
+    z-index: 9999;
+}
+
+.loading.show {
+    display: block;
+}
+
+.spinner {
+    border: 3px solid rgba(255,255,255,0.3);
+    border-top: 3px solid white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
+    display: inline-block;
+    margin-right: 10px;
+}
+
+/* 工具提示增强 */
+.tooltip-inner {
+    background-color: rgba(0,0,0,0.9);
+    border-radius: 4px;
+    font-size: 0.8em;
+    max-width: 200px;
+}
+
+/* 成功/错误消息样式 */
+.alert {
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+}
+
+.alert-dismissible .btn-close {
+    padding: 0.75rem 1rem;
+}
+
+/* 特殊效果 */
+.glow {
+    animation: glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+    from { box-shadow: 0 0 5px var(--primary-color); }
+    to { box-shadow: 0 0 20px var(--primary-color); }
+}

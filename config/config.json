@@ -1,0 +1,137 @@
+{
+  "vision": {
+    "camera_id": 0,
+    "resolution": [1280, 720],
+    "detection_model": "yolov8n.pt",
+    "detection_confidence": 0.5,
+    "ocr_language": "ch",
+    "ocr_confidence": 0.5,
+    "face_detection_enabled": true,
+    "fps_limit": 30
+  },
+  "audio": {
+    "asr_model": "small",
+    "asr_language": "zh",
+    "tts_rate": 200,
+    "tts_volume": 0.9,
+    "wake_words": ["小助手", "机器人", "你好"],
+    "sample_rate": 16000,
+    "chunk_size": 1024,
+    "channels": 1
+  },
+  "llm": {
+    "model_name": "Qwen/Qwen1.5-1.8B-Chat",
+    "model_path": "./models/qwen1.5-1.8b-chat",
+    "device": "cpu",
+    "use_onnx": false,
+    "max_length": 2048,
+    "max_new_tokens": 512,
+    "temperature": 0.7,
+    "top_p": 0.8,
+    "top_k": 50,
+    "repetition_penalty": 1.1
+  },
+  "knowledge_base": {
+    "kb_path": "./knowledge_base",
+    "embedding_model": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+    "collection_name": "educational_knowledge",
+    "search_results": 5,
+    "min_similarity": 0.3
+  },
+  "fusion": {
+    "strategy": "weighted_average",
+    "temporal_window": 2.0,
+    "confidence_threshold": 0.3,
+    "modality_weights": {
+      "vision": 0.3,
+      "audio": 0.4,
+      "text": 0.3,
+      "action": 0.0
+    }
+  },
+  "arm": {
+    "port": "/dev/ttyUSB0",
+    "baudrate": 115200,
+    "enabled": true,
+    "default_speed": 50,
+    "safety_limits": {
+      "joint_limits": {
+        "J1": [-165, 165],
+        "J2": [-165, 165], 
+        "J3": [-165, 165],
+        "J4": [-165, 165],
+        "J5": [-165, 165],
+        "J6": [-175, 175]
+      },
+      "workspace_limits": {
+        "x": [-300, 300],
+        "y": [-300, 300],
+        "z": [0, 400]
+      }
+    }
+  },
+  "dialogue": {
+    "max_turns": 20,
+    "context_window": 5,
+    "max_history_length": 10,
+    "session_timeout": 1800,
+    "default_user_level": "intermediate"
+  },
+  "system": {
+    "log_level": "INFO",
+    "log_file": "robot.log",
+    "max_log_size": "10MB",
+    "performance_monitoring": true,
+    "auto_restart": false,
+    "data_collection": {
+      "enabled": false,
+      "anonymize": true,
+      "retention_days": 30
+    }
+  },
+  "ui": {
+    "display_enabled": true,
+    "display_resolution": [800, 600],
+    "show_camera_feed": true,
+    "show_system_status": true,
+    "theme": "education"
+  },
+  "network": {
+    "api_enabled": false,
+    "api_port": 8080,
+    "cors_enabled": true,
+    "rate_limiting": {
+      "requests_per_minute": 100
+    }
+  },
+  "educational": {
+    "supported_subjects": ["math", "chinese", "english", "science", "general"],
+    "difficulty_levels": ["easy", "medium", "hard"],
+    "teaching_strategies": {
+      "beginner": {
+        "explanation_style": "simple",
+        "use_examples": true,
+        "encouragement_frequency": "high",
+        "repeat_count": 2
+      },
+      "intermediate": {
+        "explanation_style": "detailed", 
+        "use_examples": true,
+        "encouragement_frequency": "medium",
+        "repeat_count": 1
+      },
+      "advanced": {
+        "explanation_style": "comprehensive",
+        "use_examples": false,
+        "encouragement_frequency": "low",
+        "repeat_count": 1
+      }
+    },
+    "interaction_patterns": {
+      "greeting_probability": 0.8,
+      "follow_up_questions": true,
+      "learning_assessment": true,
+      "progress_tracking": true
+    }
+  }
+}
