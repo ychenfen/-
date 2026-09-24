@@ -13,7 +13,9 @@
 
 ## 安装
 
-需要 Python ≥ 3.10 和 ffmpeg（Windows：`winget install ffmpeg`；Ubuntu：`sudo apt install ffmpeg`）。
+需要 Python ≥ 3.10 和 ffmpeg（Windows：`winget install ffmpeg`；Ubuntu：`sudo apt install ffmpeg`；Mac：`brew install ffmpeg python@3.12`）。
+
+> **Mac 用户**：系统自带的 `python3` 可能是 3.9，请用 Homebrew 装的 `python3.12` 建 venv（`python3.12 -m venv .venv`）。Mac 没有 CUDA，转写默认走 CPU，不需要单独装 GPU 版 torch，直接执行下面的 `pip install -e ".[asr]"` 即可。
 
 ```bash
 cd douyin_workflow
@@ -45,7 +47,7 @@ python -m douyin_workflow list
 claude mcp add douyin -e DOUYIN_DATA_DIR=D:/douyin_data -- python -m douyin_workflow.mcp_server
 ```
 
-**Claude Desktop**，编辑 `claude_desktop_config.json`，`command` 填 venv 里 python 的绝对路径：
+**Claude Desktop**，编辑 `claude_desktop_config.json`（Mac 在 `~/Library/Application Support/Claude/`，Windows 在 `%APPDATA%\Claude\`），`command` 填 venv 里 python 的绝对路径（Mac 形如 `/Users/<你>/douyin_workflow/.venv/bin/python`）：
 
 ```json
 {
@@ -95,7 +97,7 @@ claude mcp add douyin -e DOUYIN_DATA_DIR=D:/douyin_data -- python -m douyin_work
   python -m douyin_workflow healthcheck   # 退出码 0 全部正常 / 1 部分后端坏了 / 2 全部失败
   ```
 
-  Linux 用 cron 每天跑一次：`0 9 * * * cd /path/douyin_workflow && .venv/bin/python -m douyin_workflow healthcheck`
+  Linux 或 Mac 用 cron 每天跑一次（`crontab -e`）：`0 9 * * * cd /path/douyin_workflow && .venv/bin/python -m douyin_workflow healthcheck`
   Windows 用"任务计划程序"，程序填 `.venv\Scripts\python.exe`，参数填 `-m douyin_workflow healthcheck`。
 - **限速**：进程内两次请求至少间隔 `DOUYIN_MIN_INTERVAL` 秒。一天几十条问题不大，批量上百条容易触发风控。
 - **缓存**：处理过的作品不会再次访问抖音。
@@ -105,7 +107,7 @@ claude mcp add douyin -e DOUYIN_DATA_DIR=D:/douyin_data -- python -m douyin_work
 | 现象 | 处理 |
 |---|---|
 | iesdouyin 报"没找到 _ROUTER_DATA" | 分享页改版了，先靠后面的后端兜底，再更新 `downloaders/iesdouyin.py` 的解析 |
-| yt-dlp 报 "Fresh cookies are needed" | 配置 `DOUYIN_COOKIES_FROM_BROWSER=chrome`，或导出 cookies.txt |
+| yt-dlp 报 "Fresh cookies are needed" | 配置 `DOUYIN_COOKIES_FROM_BROWSER=chrome`，或导出 cookies.txt。Mac 上第一次读 Chrome cookie 会弹钥匙串授权，点“允许”；用 Safari 需要给终端开“完全磁盘访问权限”，建议直接用 Chrome |
 | f2 报 a_bogus / msToken 相关错误 | `pip install -U f2`，并更新 `DOUYIN_COOKIE` |
 | 下载到的文件"过小" | 多半被风控，降低频率或换网络 |
 
