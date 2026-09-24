@@ -15,10 +15,12 @@ import logging
 import time
 from pathlib import Path
 
+import requests
+
 from .config import Settings, get_settings
-from .downloaders import DownloadChain, build_backends
-from .share import resolve
-from .transcribe import extract_audio, transcribe
+from .downloaders import AllBackendsFailed, DownloadChain, UnsupportedContent, build_backends
+from .share import ShareParseError, resolve
+from .transcribe import TranscribeError, extract_audio, transcribe
 
 log = logging.getLogger(__name__)
 
@@ -76,6 +78,26 @@ def douyin_to_text(share_text: str, force: bool = False, settings: Settings | No
     (item_dir / "transcript.txt").write_text(text, encoding="utf-8")
     (item_dir / "meta.json").write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
     return {**meta, "transcript": text, "cached": False}
+
+
+def run_safe(share_text: str, force: bool = False, settings: Settings | None = None) -> dict:
+    """douyin_to_text 的不抛异常版本：已知错误转成 {"error", "message"}，给 MCP / HTTP 用。"""
+    try:
+        return douyin_to_text(share_text, force=force, settings=settings)
+    except ShareParseError as e:
+        return {"error": "bad_share_text", "message": str(e)}
+    except UnsupportedContent as e:
+        return {"error": "unsupported_content", "message": str(e)}
+    except AllBackendsFailed as e:
+        return {
+            "error": "download_failed",
+            "message": "所有下载后端都失败了，可能是 cookie 过期或被风控，先跑 healthcheck 排查",
+            "backends": e.errors,
+        }
+    except TranscribeError as e:
+        return {"error": "transcribe_failed", "message": str(e)}
+    except requests.RequestException as e:
+        return {"error": "network", "message": f"网络出错：{e}"}
 
 
 def list_local(limit: int = 20, settings: Settings | None = None) -> list[dict]:

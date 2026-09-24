@@ -8,17 +8,12 @@ from __future__ import annotations
 import logging
 import sys
 
-import requests
-
 try:  # mcp >= 2.0
     from mcp.server.mcpserver import MCPServer as _Server
 except ImportError:  # mcp 1.x
     from mcp.server.fastmcp import FastMCP as _Server
 
 from . import pipeline
-from .downloaders import AllBackendsFailed, UnsupportedContent
-from .share import ShareParseError
-from .transcribe import TranscribeError
 
 # stdio 模式下 stdout 专供 JSON-RPC，日志一律走 stderr
 logging.basicConfig(stream=sys.stderr, level=logging.INFO, format="%(asctime)s %(name)s %(message)s")
@@ -36,22 +31,7 @@ def douyin_to_text(share_text: str, force: bool = False) -> dict:
     同一作品第二次请求直接读本地缓存；force=True 强制重新下载和转写。
     首次调用要加载转写模型，可能需要几十秒。
     """
-    try:
-        return pipeline.douyin_to_text(share_text, force=force)
-    except ShareParseError as e:
-        return {"error": "bad_share_text", "message": str(e)}
-    except UnsupportedContent as e:
-        return {"error": "unsupported_content", "message": str(e)}
-    except AllBackendsFailed as e:
-        return {
-            "error": "download_failed",
-            "message": "所有下载后端都失败了，可能是 cookie 过期或被风控，先跑 healthcheck 排查",
-            "backends": e.errors,
-        }
-    except TranscribeError as e:
-        return {"error": "transcribe_failed", "message": str(e)}
-    except requests.RequestException as e:
-        return {"error": "network", "message": f"解析短链时网络出错：{e}"}
+    return pipeline.run_safe(share_text, force=force)
 
 
 @mcp.tool()

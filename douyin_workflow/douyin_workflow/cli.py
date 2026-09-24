@@ -102,6 +102,25 @@ def cmd_healthcheck(args) -> int:
     return level
 
 
+def cmd_serve(args) -> int:
+    from .server import App, make_server
+
+    token = os.getenv("DOUYIN_SERVER_TOKEN")
+    if not token:
+        import secrets
+
+        print("请先设置 DOUYIN_SERVER_TOKEN，例如：", file=sys.stderr)
+        print(f"  export DOUYIN_SERVER_TOKEN={secrets.token_hex(16)}", file=sys.stderr)
+        return 2
+    srv = make_server(App(token, wait_s=args.wait), args.host, args.port)
+    print(f"已启动：http://{args.host}:{args.port}/transcribe", file=sys.stderr)
+    try:
+        srv.serve_forever()
+    except KeyboardInterrupt:
+        pass
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     logging.basicConfig(stream=sys.stderr, level=logging.INFO, format="%(asctime)s %(name)s %(message)s")
     p = argparse.ArgumentParser(prog="douyin_workflow")
@@ -119,6 +138,12 @@ def main(argv: list[str] | None = None) -> int:
 
     h = sub.add_parser("healthcheck", help="逐个后端测试固定链接")
     h.set_defaults(func=cmd_healthcheck)
+
+    sv = sub.add_parser("serve", help="启动给 iPhone 快捷指令用的 HTTP 服务")
+    sv.add_argument("--host", default=os.getenv("DOUYIN_SERVER_HOST", "0.0.0.0"))
+    sv.add_argument("--port", type=int, default=int(os.getenv("DOUYIN_SERVER_PORT", "8765")))
+    sv.add_argument("--wait", type=float, default=25, help="单次请求最多等几秒")
+    sv.set_defaults(func=cmd_serve)
 
     args = p.parse_args(argv)
     try:

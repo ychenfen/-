@@ -72,6 +72,67 @@ claude mcp add douyin -e DOUYIN_DATA_DIR=D:/douyin_data -- python -m douyin_work
 
 用法示例：*"把这条转成文字，拆一下开头 3 秒的钩子、论证结构和用到的数据，再按我的口吻改写成 60 秒口播：<粘贴口令>"*
 
+## iPhone 快捷指令：复制链接，点一下就出文字
+
+```
+iPhone：复制抖音/微信里的链接 → 轻点手机背面两下（或点桌面图标）
+   ↓  快捷指令把链接发给家里的 Mac
+Mac：下载 → 转写（视频转完即删）
+   ↓
+iPhone：弹出逐字稿，同时已经复制到剪贴板，可以直接粘贴给老板
+```
+
+### 1. Mac 端：装成开机自启服务
+
+先按上面的「安装」装好，并在终端里跑通一次 `python -m douyin_workflow run "<口令>"`。第一次读取 Chrome cookie 时，Mac 会弹出"钥匙串"窗口，请点"始终允许"。然后执行：
+
+```bash
+bash deploy/macos/install.sh
+```
+
+脚本会注册一个登录后自动启动的后台服务（端口 8765），生成一个 token，并打印快捷指令要填的**地址**和 **Authorization**，请记下来。重复执行也不会丢失 token，停用方法见脚本输出。
+
+另外要防止 Mac 睡眠：打开"系统设置 → 电池（或能源）→ 选项"，勾选"接电源时防止自动进入睡眠"。
+
+**在外面也想用**：Mac 和 iPhone 都安装 [Tailscale](https://tailscale.com)，并登录同一个账号，重新执行一次 `install.sh`，它会额外打印一个 `100.x.x.x` 的地址。只在家里用的话，同一个 Wi-Fi 下用 `http://你的Mac名.local:8765` 就行。
+
+### 2. iPhone 端：搭快捷指令（大约 5 分钟）
+
+打开「快捷指令」App → 右上角 **+** → 名字改成 **抖音转文字**，依次添加下面的动作：
+
+1. **获取剪贴板**
+2. **重复** 20 次，在重复块里面依次添加：
+   1. **获取 URL 内容**
+      - URL：填 install.sh 打印的地址，例如 `http://xxx.local:8765/transcribe`
+      - 展开"显示更多" → 方法选 **POST**
+      - 头部：添加一项，键填 `Authorization`，值填 `Bearer 你的token`（Bearer 后面有一个空格）
+      - 请求体选 **JSON**，添加一个"文本"字段，键填 `text`，值选变量 **剪贴板**
+   2. **获取词典值**：获取 `status` 的值，词典选上一步的"URL 的内容"
+   3. **如果** "词典值" **不是** `running`：
+      - **获取词典值**：获取 `text` 的值，词典选"URL 的内容"
+      - **拷贝到剪贴板**：词典值
+      - **快速查看**：词典值
+      - **停止此快捷指令**
+   4. **结束如果**
+3. 在"结束重复"后面添加 **显示通知**：`还在处理，过一两分钟再点一次，做完会立刻返回`
+
+每次请求最多等 25 秒，20 次循环最多等 8 分钟左右。一条 1～3 分钟的视频通常一两轮就能返回。同一条链接再点一次会直接从缓存返回。
+
+**触发方式**（选一个就行）：
+- **轻点背面**：打开"设置 → 辅助功能 → 触控 → 轻点背面 → 轻点两下"，选择「抖音转文字」。复制链接后敲两下手机背面就开始转写。
+- 把快捷指令添加到主屏幕，或者对 Siri 说"抖音转文字"。
+
+链接来源：在抖音里点"分享 → 复制链接"；老板在微信发来的口令或链接，长按后选"复制"即可。
+
+### 常见问题
+
+| 现象 | 处理 |
+|---|---|
+| 快捷指令报"无法连接到服务器" | Mac 睡眠了或关机了；或者手机不在同一个 Wi-Fi 上，又没有开 Tailscale |
+| 返回"token 不对" | 检查 Authorization 的值，应该是 `Bearer ` 加 token，中间有一个空格 |
+| 返回"处理失败：所有下载后端都失败了" | 多半是 cookie 过期：在 Mac 的 Chrome 里重新打开 douyin.com，然后再试 |
+| 其他问题 | 查看 Mac 上的日志 `~/Library/Logs/douyin-workflow/server.log` |
+
 ## 配置（环境变量）
 
 | 变量 | 默认 | 说明 |
@@ -86,6 +147,8 @@ claude mcp add douyin -e DOUYIN_DATA_DIR=D:/douyin_data -- python -m douyin_work
 | `DOUYIN_ASR_DEVICE` | `auto` | `auto` 表示有 CUDA 就用 GPU，也可指定 `cuda:0` 或 `cpu` |
 | `DOUYIN_KEEP_VIDEO` | `0` | 设为 `1` 时保留 mp4，默认转写完就删 |
 | `DOUYIN_HEALTH_URLS` | – | 健康检查用的固定作品链接，逗号分隔 |
+| `DOUYIN_SERVER_TOKEN` | – | `serve` 服务的访问口令（install.sh 自动生成） |
+| `DOUYIN_SERVER_PORT` | `8765` | `serve` 服务端口 |
 | `DOUYIN_ALERT_WEBHOOK` | – | 健康检查失败时 POST `{"title","body"}` 到这个地址，例如 Bark 的 `https://api.day.app/<key>` |
 
 ## 稳定性：坏了能很快发现、很快切换
@@ -125,7 +188,7 @@ pip install -e ".[dev]" && pytest
 
 ## 后续步骤
 
-1. ✅ MVP：本地下载降级 + FunASR + MCP 工具
+1. ✅ MVP：本地下载降级 + FunASR + MCP 工具 + iPhone 快捷指令
 2. 入库（Postgres + 向量索引）+ LLM 结构化拆解（钩子、结构、论点、数据、违禁词）
 3. 网页后台：检索、爆款对比、一键改写口语稿
 4. 接入卡片和剪映产线，健康检查告警接入统一通知
