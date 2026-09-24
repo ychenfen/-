@@ -192,3 +192,31 @@ pip install -e ".[dev]" && pytest
 2. 入库（Postgres + 向量索引）+ LLM 结构化拆解（钩子、结构、论点、数据、违禁词）
 3. 网页后台：检索、爆款对比、一键改写口语稿
 4. 接入卡片和剪映产线，健康检查告警接入统一通知
+
+## 部署到云服务器（手机浏览器直接用）
+
+小内存服务器（实测 4 核 / 3.3 GB，可用约 1.3 GB）装不下 FunASR + torch，改用 sherpa-onnx 跑 SenseVoice int8 模型：约 230 MB，纯 CPU，不需要 API 密钥。一段 15 秒中文语音转写约 2 秒，进程内存峰值约 410 MB。长音频按 25 秒左右切段，切点取前后 5 秒内最安静的位置，避免把词切断。
+
+服务启动后访问根路径 `/` 是一个手机网页：粘贴抖音口令，点"转文字"，页面轮询 `/transcribe` 直到出结果，并提供"复制全文"。访问密码就是 `DOUYIN_SERVER_TOKEN`。页面只用相对路径，可以挂在 nginx 的任意前缀下。
+
+```bash
+# 1. 代码与依赖（在 ~/dy2text 下）
+python3 -m venv venv
+venv/bin/pip install requests yt-dlp sherpa-onnx numpy imageio-ffmpeg
+ln -sf "$(venv/bin/python -c 'import imageio_ffmpeg;print(imageio_ffmpeg.get_ffmpeg_exe())')" venv/bin/ffmpeg
+rsync -a douyin_workflow/ ~/dy2text/app/        # 本仓库的 douyin_workflow 目录
+
+# 2. 模型（国内用 hf-mirror，GitHub release 很慢）
+mkdir -p models/sensevoice && cd models/sensevoice
+B=https://hf-mirror.com/csukuangfj/sherpa-onnx-sense-voice-zh-en-ja-ko-yue-2024-07-17/resolve/main
+curl -LO $B/model.int8.onnx && curl -LO $B/tokens.txt && cd ../..
+
+# 3. 配置、服务、反代
+cp app/deploy/linux/dy2text.env.example dy2text.env && chmod 600 dy2text.env   # 填 TOKEN
+sudo cp app/deploy/linux/dy2text.service /etc/systemd/system/ && sudo systemctl enable --now dy2text
+# 把 deploy/linux/nginx-location.conf 放进已有 HTTPS 站点的 server 块，nginx -t 后 reload
+```
+
+在服务器上命令行处理一条链接（和网页共用缓存）：`~/dy2text/dy.sh "<分享口令>"`，脚本见 `deploy/linux/dy.sh`。
+
+注意：机房 IP 比家用宽带更容易被抖音风控。无 cookie 的 `iesdouyin` 后端失败时，给 `ytdlp` 配 `DOUYIN_COOKIES_FILE` 再试。

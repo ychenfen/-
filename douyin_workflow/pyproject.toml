@@ -16,6 +16,8 @@ dependencies = [
 [project.optional-dependencies]
 # 转写：GPU 用户请先按 pytorch.org 装好对应 CUDA 版本的 torch，再装这个
 asr = ["funasr>=1.1", "modelscope", "torch", "torchaudio"]
+# 轻量转写：小内存云服务器用，配合 DOUYIN_ASR_MODEL=sherpa-sensevoice
+lite = ["sherpa-onnx", "numpy", "imageio-ffmpeg"]
 f2 = ["f2"]
 dev = ["pytest"]
 

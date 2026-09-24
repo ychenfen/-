@@ -28,7 +28,7 @@ class Settings:
     cookie_string: str | None = field(default_factory=lambda: os.getenv("DOUYIN_COOKIE") or None)
     # 两次下载之间的最小间隔（秒），防风控
     min_interval: float = field(default_factory=lambda: float(os.getenv("DOUYIN_MIN_INTERVAL", "8")))
-    # 转写模型：paraformer-zh 或 SenseVoiceSmall
+    # 转写模型：paraformer-zh / SenseVoiceSmall（FunASR）或 sherpa-sensevoice（轻量 CPU）
     asr_model: str = field(default_factory=lambda: os.getenv("DOUYIN_ASR_MODEL", "paraformer-zh"))
     # auto / cuda / cuda:0 / cpu
     asr_device: str = field(default_factory=lambda: os.getenv("DOUYIN_ASR_DEVICE", "auto"))

@@ -123,3 +123,20 @@ def test_run_safe_maps_errors(monkeypatch):
 
     monkeypatch.setattr(pipeline, "douyin_to_text", boom)
     assert pipeline.run_safe("x")["error"] == "bad_share_text"
+
+
+def test_index_page_served():
+    import threading
+    import urllib.request
+
+    from douyin_workflow.server import App, make_server
+
+    app = App("t", runner=lambda url: {}, resolver=lambda t: ("u", "1"))
+    srv = make_server(app, "127.0.0.1", 0)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    try:
+        port = srv.server_address[1]
+        body = urllib.request.urlopen(f"http://127.0.0.1:{port}/").read().decode("utf-8")
+        assert "抖音转文字" in body and 'fetch("transcribe"' in body
+    finally:
+        srv.shutdown()

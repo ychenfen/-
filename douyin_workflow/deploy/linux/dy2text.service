@@ -1,0 +1,16 @@
+[Unit]
+Description=Douyin link to transcript web service
+After=network-online.target
+
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu/dy2text
+EnvironmentFile=/home/ubuntu/dy2text/dy2text.env
+ExecStart=/home/ubuntu/dy2text/venv/bin/python -m douyin_workflow serve --wait 20
+Restart=on-failure
+RestartSec=5
+MemoryMax=1200M
+Nice=5
+
+[Install]
+WantedBy=multi-user.target

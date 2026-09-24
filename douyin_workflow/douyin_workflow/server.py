@@ -29,6 +29,7 @@ import requests
 from . import pipeline
 from .config import Settings, get_settings
 from .share import ShareParseError, resolve
+from .web_page import INDEX_HTML
 
 log = logging.getLogger(__name__)
 
@@ -121,8 +122,18 @@ def _handler(app: App):
             self.wfile.write(data)
 
         def do_GET(self):
-            if self.path == "/health":
+            path = self.path.split("?", 1)[0]
+            if path == "/health":
                 return self._send(200, {"ok": True})
+            if path in ("/", "/index.html"):
+                data = INDEX_HTML.encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "text/html; charset=utf-8")
+                self.send_header("Content-Length", str(len(data)))
+                self.send_header("Cache-Control", "no-cache")
+                self.end_headers()
+                self.wfile.write(data)
+                return
             self._send(404, {"status": "error", "text": "not found"})
 
         def do_POST(self):
