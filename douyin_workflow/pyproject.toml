@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "douyin-workflow"
+version = "0.1.0"
+description = "抖音分享口令 → 下载（多后端降级）→ FunASR 转写，封装成 MCP 工具"
+requires-python = ">=3.10"
+dependencies = [
+  "requests>=2.31",
+  "mcp>=1.2",
+  "yt-dlp>=2024.10",
+]
+
+[project.optional-dependencies]
+# 转写：GPU 用户请先按 pytorch.org 装好对应 CUDA 版本的 torch，再装这个
+asr = ["funasr>=1.1", "modelscope", "torch", "torchaudio"]
+f2 = ["f2"]
+dev = ["pytest"]
+
+[project.scripts]
+douyin-workflow = "douyin_workflow.cli:main"
+douyin-mcp = "douyin_workflow.mcp_server:main"
+
+[tool.setuptools]
+packages = ["douyin_workflow", "douyin_workflow.downloaders"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
