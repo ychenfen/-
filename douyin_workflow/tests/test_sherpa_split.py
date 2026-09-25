@@ -1,6 +1,8 @@
-import numpy as np
+import pytest
 
-from douyin_workflow.transcribe import split_points
+np = pytest.importorskip("numpy")  # 属于可选依赖 .[lite]
+
+from douyin_workflow.transcribe import split_points  # noqa: E402
 
 
 def test_short_audio_not_split():
