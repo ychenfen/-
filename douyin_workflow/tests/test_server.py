@@ -48,7 +48,14 @@ SHARE = "看看 https://v.douyin.com/abc/ 这个"
 
 
 def ok_runner(url):
-    return {"title": "降息怎么看", "author": "财经小王", "duration_s": 61.2, "transcript": "大家好。"}
+    return {
+        "title": "降息怎么看",
+        "author": "财经小王",
+        "duration_s": 61.2,
+        "transcript": "大家好。",
+        "backend": "iesdouyin",
+        "timing_s": {"download": 1.2, "transcribe": 3.4},
+    }
 
 
 def test_rejects_wrong_token(serve):
@@ -63,6 +70,23 @@ def test_done_returns_readable_text(serve):
     res = post(base, SHARE)
     assert res["status"] == "done"
     assert res["text"] == "降息怎么看\n财经小王 · 61.2秒\n\n大家好。"
+
+
+def test_done_also_returns_structured_fields(serve):
+    base, _ = serve(ok_runner)
+    res = post(base, SHARE)
+    assert res == {
+        "status": "done",
+        "text": "降息怎么看\n财经小王 · 61.2秒\n\n大家好。",
+        "aweme_id": AWEME,
+        "cached": False,
+        "title": "降息怎么看",
+        "author": "财经小王",
+        "duration_s": 61.2,
+        "transcript": "大家好。",
+        "backend": "iesdouyin",
+        "timing_s": {"download": 1.2, "transcribe": 3.4},
+    }
 
 
 def test_plain_text_body_accepted(serve):
@@ -100,6 +124,7 @@ def test_cached_result_served_from_disk(serve):
     (d / "transcript.txt").write_text("缓存里的字", encoding="utf-8")
     res = post(base, SHARE)
     assert res["status"] == "done" and res["cached"] is True and "缓存里的字" in res["text"]
+    assert res["title"] == "旧的" and res["transcript"] == "缓存里的字"
 
 
 def test_error_is_reported_and_retry_restarts(serve):
@@ -137,6 +162,14 @@ def test_index_page_served():
     try:
         port = srv.server_address[1]
         body = urllib.request.urlopen(f"http://127.0.0.1:{port}/").read().decode("utf-8")
-        assert "抖音转文字" in body and 'fetch("transcribe"' in body
+        assert "抖音素材台" in body and 'fetch("transcribe"' in body
+        assert all(label in body for label in ("复制纯逐字稿", "下载 TXT", "复制深挖提示词", "最近处理"))
+
+        req = urllib.request.Request(f"http://127.0.0.1:{port}/", method="HEAD")
+        with urllib.request.urlopen(req) as response:
+            assert response.status == 200
+            assert response.headers["Content-Type"] == "text/html; charset=utf-8"
+            assert int(response.headers["Content-Length"]) == len(body.encode("utf-8"))
+            assert response.read() == b""
     finally:
         srv.shutdown()

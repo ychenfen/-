@@ -42,6 +42,22 @@ def format_done(res: dict) -> str:
     return f"{head}\n{meta}\n\n{res.get('transcript', '')}".strip()
 
 
+def done_payload(res: dict, aweme_id: str, cached: bool) -> dict:
+    """保留旧客户端需要的 text，同时给网页提供可编辑的结构化结果。"""
+    return {
+        "status": "done",
+        "text": format_done(res),
+        "aweme_id": aweme_id,
+        "cached": cached,
+        "title": res.get("title") or "",
+        "author": res.get("author") or "",
+        "duration_s": res.get("duration_s"),
+        "transcript": res.get("transcript") or "",
+        "backend": res.get("backend") or "",
+        "timing_s": res.get("timing_s") or {},
+    }
+
+
 class Jobs:
     """按作品 ID 去重的后台任务。转写本身是串行的，所以只开一个工作线程。"""
 
@@ -91,7 +107,7 @@ class App:
 
         cached = pipeline.load_cached(self.settings.data_dir / aweme_id)
         if cached:
-            return {"status": "done", "text": format_done(cached), "aweme_id": aweme_id, "cached": True}
+            return done_payload(cached, aweme_id, True)
 
         future, started = self.jobs.get_or_start(aweme_id, url)
         try:
@@ -108,11 +124,20 @@ class App:
         self.jobs.finish(aweme_id)
         if "error" in res:
             return {"status": "error", "text": f"处理失败：{res['message']}", "aweme_id": aweme_id, **res}
-        return {"status": "done", "text": format_done(res), "aweme_id": aweme_id, "cached": False}
+        return done_payload(res, aweme_id, False)
 
 
 def _handler(app: App):
     class Handler(BaseHTTPRequestHandler):
+        def _html_headers(self) -> bytes:
+            data = INDEX_HTML.encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(data)))
+            self.send_header("Cache-Control", "no-cache")
+            self.end_headers()
+            return data
+
         def _send(self, code: int, body: dict) -> None:
             data = json.dumps(body, ensure_ascii=False).encode("utf-8")
             self.send_response(code)
@@ -126,15 +151,24 @@ def _handler(app: App):
             if path == "/health":
                 return self._send(200, {"ok": True})
             if path in ("/", "/index.html"):
-                data = INDEX_HTML.encode("utf-8")
-                self.send_response(200)
-                self.send_header("Content-Type", "text/html; charset=utf-8")
-                self.send_header("Content-Length", str(len(data)))
-                self.send_header("Cache-Control", "no-cache")
-                self.end_headers()
-                self.wfile.write(data)
+                self.wfile.write(self._html_headers())
                 return
             self._send(404, {"status": "error", "text": "not found"})
+
+        def do_HEAD(self):
+            path = self.path.split("?", 1)[0]
+            if path in ("/", "/index.html"):
+                self._html_headers()
+                return
+            if path == "/health":
+                data = json.dumps({"ok": True}).encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.send_header("Content-Length", str(len(data)))
+                self.end_headers()
+                return
+            self.send_response(404)
+            self.end_headers()
 
         def do_POST(self):
             if self.path != "/transcribe":
