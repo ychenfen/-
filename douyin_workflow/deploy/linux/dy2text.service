@@ -1,0 +1,28 @@
+[Unit]
+Description=Douyin link to transcript web service
+After=network-online.target
+
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu/dy2text
+EnvironmentFile=/home/ubuntu/dy2text/dy2text.env
+ExecStart=/home/ubuntu/dy2text/venv/bin/python -m douyin_workflow serve --wait 20
+Restart=on-failure
+RestartSec=5
+MemoryMax=1200M
+Nice=5
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/ubuntu/dy2text/data
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+
+[Install]
+WantedBy=multi-user.target
