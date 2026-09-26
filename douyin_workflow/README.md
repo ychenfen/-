@@ -4,7 +4,7 @@
 
 ```
 分享口令 → 提取链接/短链跳转 → 作品 ID
-        → 下载：iesdouyin 分享页 → f2 → yt-dlp（前一个失败自动换下一个）
+        → 下载：匿名 Chromium → iesdouyin 分享页 → f2 / yt-dlp（前一个失败自动换下一个）
         → ffmpeg 抽 16k 音频 → FunASR 转写（paraformer-zh / SenseVoiceSmall）
         → 落盘 <DOUYIN_DATA_DIR>/<作品ID>/ { meta.json, transcript.txt, audio.wav }
 ```
@@ -139,13 +139,17 @@ bash deploy/macos/install.sh
 |---|---|---|
 | `DOUYIN_DATA_DIR` | `~/douyin_workflow_data` | 素材库目录 |
 | `DOUYIN_BACKENDS` | `iesdouyin,f2,ytdlp` | 下载后端顺序 |
+| `DOUYIN_CHROMIUM_EXECUTABLE` | – | `browser` 后端和 Cookie 刷新使用的 Chromium 路径；不读取个人配置 |
 | `DOUYIN_COOKIE` | – | 网页版 douyin.com 的 cookie 字符串（f2 用），从浏览器开发者工具复制 |
 | `DOUYIN_COOKIES_FILE` | – | Netscape 格式 cookies.txt（yt-dlp 用） |
+| `DOUYIN_COOKIE_SEED_URL` | 内置公开作品 | 云端匿名浏览器刷新 Cookie 时访问的公开作品；不要使用私密作品 |
 | `DOUYIN_COOKIES_FROM_BROWSER` | – | 让 yt-dlp 直接读浏览器 cookie，如 `chrome`、`edge`、`firefox` |
 | `DOUYIN_MIN_INTERVAL` | `8` | 两次下载请求的最小间隔（秒） |
 | `DOUYIN_ASR_MODEL` | `paraformer-zh` | 也可以用 `SenseVoiceSmall`，速度更快，对口语和方言更友好 |
 | `DOUYIN_ASR_DEVICE` | `auto` | `auto` 表示有 CUDA 就用 GPU，也可指定 `cuda:0` 或 `cpu` |
 | `DOUYIN_KEEP_VIDEO` | `0` | 设为 `1` 时保留 mp4，默认转写完就删 |
+| `DOUYIN_VIDEO_TTL_HOURS` | `24` | 原视频下载保留时间；只清理视频，不删逐字稿和音频 |
+| `DOUYIN_VIDEO_MAX_GB` | `2` | 原视频总容量上限，超限时从最旧文件开始清理 |
 | `DOUYIN_HEALTH_URLS` | – | 健康检查用的固定作品链接，逗号分隔 |
 | `DOUYIN_SERVER_TOKEN` | – | `serve` 服务的访问口令（install.sh 自动生成） |
 | `DOUYIN_SERVER_PORT` | `8765` | `serve` 服务端口 |
@@ -169,8 +173,9 @@ bash deploy/macos/install.sh
 
 | 现象 | 处理 |
 |---|---|
+| browser 报 Chromium 不存在 | 配置 `DOUYIN_CHROMIUM_EXECUTABLE`，并确认该文件可由服务用户执行 |
 | iesdouyin 报"没找到 _ROUTER_DATA" | 分享页改版了，先靠后面的后端兜底，再更新 `downloaders/iesdouyin.py` 的解析 |
-| yt-dlp 报 "Fresh cookies are needed" | 配置 `DOUYIN_COOKIES_FROM_BROWSER=chrome`，或导出 cookies.txt。Mac 上第一次读 Chrome cookie 会弹钥匙串授权，点“允许”；用 Safari 需要给终端开“完全磁盘访问权限”，建议直接用 Chrome |
+| yt-dlp 报 "Fresh cookies are needed" | 上游尚未实现新版签名挑战；云端优先使用 `browser`，不要上传个人浏览器 Cookie |
 | f2 报 a_bogus / msToken 相关错误 | `pip install -U f2`，并更新 `DOUYIN_COOKIE` |
 | 下载到的文件"过小" | 多半被风控，降低频率或换网络 |
 
@@ -202,7 +207,8 @@ pip install -e ".[dev]" && pytest
 ```bash
 # 1. 代码与依赖（在 ~/dy2text 下）
 python3 -m venv venv
-venv/bin/pip install requests yt-dlp sherpa-onnx numpy imageio-ffmpeg
+venv/bin/pip install requests yt-dlp sherpa-onnx numpy imageio-ffmpeg playwright
+PLAYWRIGHT_BROWSERS_PATH=~/dy2text/playwright-browsers venv/bin/playwright install chromium
 ln -sf "$(venv/bin/python -c 'import imageio_ffmpeg;print(imageio_ffmpeg.get_ffmpeg_exe())')" venv/bin/ffmpeg
 rsync -a douyin_workflow/ ~/dy2text/app/        # 本仓库的 douyin_workflow 目录
 
@@ -213,10 +219,21 @@ curl -LO $B/model.int8.onnx && curl -LO $B/tokens.txt && cd ../..
 
 # 3. 配置、服务、反代
 cp app/deploy/linux/dy2text.env.example dy2text.env && chmod 600 dy2text.env   # 填 TOKEN
-sudo cp app/deploy/linux/dy2text.service /etc/systemd/system/ && sudo systemctl enable --now dy2text
+mkdir -p secrets && chmod 700 secrets
+sudo cp app/deploy/linux/dy2text.service app/deploy/linux/dy2text-cookie-refresh.{service,timer} /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now dy2text-cookie-refresh.timer
+sudo systemctl start dy2text-cookie-refresh.service
+sudo systemctl enable --now dy2text
 # 把 deploy/linux/nginx-location.conf 放进已有 HTTPS 站点的 server 块，nginx -t 后 reload
 ```
 
 在服务器上命令行处理一条链接（和网页共用缓存）：`~/dy2text/dy.sh "<分享口令>"`，脚本见 `deploy/linux/dy.sh`。
 
-注意：机房 IP 比家用宽带更容易被抖音风控。无 cookie 的 `iesdouyin` 后端失败时，给 `ytdlp` 配 `DOUYIN_COOKIES_FILE` 再试。
+云端 Cookie 刷新使用全新的临时 Chromium 会话，不读取任何个人浏览器配置，也不登录抖音。只把
+`douyin.com` 的匿名设备 Cookie 原子写入 `secrets/douyin-anon-cookies.txt`，目录权限为 0700、文件为
+0600；刷新失败时保留上一次可用文件。定时器每 12 小时刷新一次并加入随机延迟，降低固定节奏触发风控的概率。
+
+生产推荐 `DOUYIN_BACKENDS=browser,iesdouyin,ytdlp`。`browser` 每次使用全新无痕会话捕获当前有效的
+作品详情，随后关闭浏览器再流式下载；Cookie 定时刷新保留给 yt-dlp 和健康诊断。机房 IP 仍可能被风控，
+因此保留降级链、请求间隔和失败告警，不保证第三方页面永久不变。

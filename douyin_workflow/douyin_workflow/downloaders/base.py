@@ -44,7 +44,12 @@ MIN_VIDEO_BYTES = 50 * 1024
 
 
 def stream_to_file(
-    urls: list[str], dest: Path, session: requests.Session, timeout: float, referer: str = "https://www.douyin.com/"
+    urls: list[str],
+    dest: Path,
+    session: requests.Session,
+    timeout: float,
+    referer: str = "https://www.douyin.com/",
+    user_agent: str = MOBILE_UA,
 ) -> str:
     """依次尝试多个 CDN 地址，返回成功的那个。太小的文件视为失败（多半是风控页）。"""
     errors = []
@@ -52,7 +57,7 @@ def stream_to_file(
     for u in urls:
         try:
             with session.get(
-                u, headers={"User-Agent": MOBILE_UA, "Referer": referer}, stream=True, timeout=timeout
+                u, headers={"User-Agent": user_agent, "Referer": referer}, stream=True, timeout=timeout
             ) as r:
                 r.raise_for_status()
                 ctype = r.headers.get("Content-Type", "")

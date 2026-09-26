@@ -9,6 +9,7 @@ from pathlib import Path
 
 from ..config import Settings
 from .base import Backend, DownloadError, UnsupportedContent, VideoInfo
+from .browser import BrowserBackend
 from .f2_backend import F2Backend
 from .iesdouyin import IesDouyinBackend
 from .ytdlp_backend import YtDlpBackend
@@ -34,6 +35,7 @@ class AllBackendsFailed(RuntimeError):
 
 def build_backends(settings: Settings) -> list[Backend]:
     factories = {
+        "browser": lambda: BrowserBackend(settings.chromium_executable, timeout=settings.timeout),
         "iesdouyin": lambda: IesDouyinBackend(timeout=settings.timeout),
         "f2": lambda: F2Backend(cookie=settings.cookie_string, timeout=settings.timeout),
         "ytdlp": lambda: YtDlpBackend(settings.cookies_file, settings.cookies_from_browser),

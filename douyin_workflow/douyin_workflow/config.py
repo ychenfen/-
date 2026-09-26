@@ -19,6 +19,10 @@ class Settings:
     )
     # 下载后端顺序，前一个失败自动换下一个
     backends: list[str] = field(default_factory=lambda: _env_list("DOUYIN_BACKENDS", "iesdouyin,f2,ytdlp"))
+    # 匿名浏览器后端可显式指定服务器上的 Chromium；不会读取持久化用户配置。
+    chromium_executable: str | None = field(
+        default_factory=lambda: os.getenv("DOUYIN_CHROMIUM_EXECUTABLE") or None
+    )
     # Netscape 格式 cookies.txt（yt-dlp 用）；也可以用 DOUYIN_COOKIES_FROM_BROWSER=chrome
     cookies_file: str | None = field(default_factory=lambda: os.getenv("DOUYIN_COOKIES_FILE") or None)
     cookies_from_browser: str | None = field(
@@ -34,6 +38,11 @@ class Settings:
     asr_device: str = field(default_factory=lambda: os.getenv("DOUYIN_ASR_DEVICE", "auto"))
     # 转写完是否保留视频文件（默认只留音频和文字）
     keep_video: bool = field(default_factory=lambda: os.getenv("DOUYIN_KEEP_VIDEO", "0") == "1")
+    # 保留原视频供下载的期限与总容量；只清理 video.*，不删逐字稿、音频和元数据
+    video_ttl_hours: float = field(default_factory=lambda: float(os.getenv("DOUYIN_VIDEO_TTL_HOURS", "24")))
+    video_max_bytes: int = field(
+        default_factory=lambda: int(float(os.getenv("DOUYIN_VIDEO_MAX_GB", "2")) * 1024**3)
+    )
     timeout: float = field(default_factory=lambda: float(os.getenv("DOUYIN_HTTP_TIMEOUT", "20")))
 
 

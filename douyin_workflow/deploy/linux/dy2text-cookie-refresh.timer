@@ -1,0 +1,12 @@
+[Unit]
+Description=Periodically refresh anonymous Douyin cookies
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=12h
+RandomizedDelaySec=30min
+Persistent=true
+Unit=dy2text-cookie-refresh.service
+
+[Install]
+WantedBy=timers.target

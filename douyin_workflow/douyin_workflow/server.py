@@ -17,6 +17,8 @@ from __future__ import annotations
 import hmac
 import json
 import logging
+import re
+import secrets
 import threading
 import time
 from concurrent.futures import Future, ThreadPoolExecutor
@@ -28,6 +30,7 @@ import requests
 
 from . import pipeline
 from .config import Settings, get_settings
+from .media import cleanup_retained_videos, create_workbench_bundle, retained_video
 from .share import ShareParseError, resolve
 from .web_page import INDEX_HTML
 
@@ -42,7 +45,7 @@ def format_done(res: dict) -> str:
     return f"{head}\n{meta}\n\n{res.get('transcript', '')}".strip()
 
 
-def done_payload(res: dict, aweme_id: str, cached: bool) -> dict:
+def done_payload(res: dict, aweme_id: str, cached: bool, video_available: bool = False) -> dict:
     """保留旧客户端需要的 text，同时给网页提供可编辑的结构化结果。"""
     return {
         "status": "done",
@@ -55,6 +58,7 @@ def done_payload(res: dict, aweme_id: str, cached: bool) -> dict:
         "transcript": res.get("transcript") or "",
         "backend": res.get("backend") or "",
         "timing_s": res.get("timing_s") or {},
+        "video_available": video_available,
     }
 
 
@@ -98,6 +102,7 @@ class App:
         return bool(header) and hmac.compare_digest(header.encode(), expected.encode())
 
     def transcribe(self, share_text: str) -> dict:
+        cleanup_retained_videos(self.settings)
         try:
             url, aweme_id = self.resolver(share_text)
         except ShareParseError as e:
@@ -107,7 +112,7 @@ class App:
 
         cached = pipeline.load_cached(self.settings.data_dir / aweme_id)
         if cached:
-            return done_payload(cached, aweme_id, True)
+            return done_payload(cached, aweme_id, True, retained_video(self.settings, aweme_id) is not None)
 
         future, started = self.jobs.get_or_start(aweme_id, url)
         try:
@@ -124,17 +129,41 @@ class App:
         self.jobs.finish(aweme_id)
         if "error" in res:
             return {"status": "error", "text": f"处理失败：{res['message']}", "aweme_id": aweme_id, **res}
-        return done_payload(res, aweme_id, False)
+        return done_payload(res, aweme_id, False, retained_video(self.settings, aweme_id) is not None)
 
 
 def _handler(app: App):
     class Handler(BaseHTTPRequestHandler):
         def _html_headers(self) -> bytes:
-            data = INDEX_HTML.encode("utf-8")
+            nonce = secrets.token_urlsafe(18)
+            data = INDEX_HTML.replace("__CSP_NONCE__", nonce).encode("utf-8")
             self.send_response(200)
             self.send_header("Content-Type", "text/html; charset=utf-8")
             self.send_header("Content-Length", str(len(data)))
             self.send_header("Cache-Control", "no-cache")
+            self.send_header("X-Content-Type-Options", "nosniff")
+            self.send_header("X-Frame-Options", "DENY")
+            self.send_header("Referrer-Policy", "no-referrer")
+            self.send_header(
+                "Permissions-Policy",
+                "camera=(), microphone=(), geolocation=(), payment=(), usb=()",
+            )
+            self.send_header(
+                "Content-Security-Policy",
+                "; ".join(
+                    (
+                        "default-src 'none'",
+                        "base-uri 'none'",
+                        "connect-src 'self'",
+                        "img-src data:",
+                        f"style-src 'nonce-{nonce}'",
+                        f"script-src 'nonce-{nonce}'",
+                        "object-src 'none'",
+                        "frame-ancestors 'none'",
+                        "form-action 'none'",
+                    )
+                ),
+            )
             self.end_headers()
             return data
 
@@ -146,6 +175,24 @@ def _handler(app: App):
             self.end_headers()
             self.wfile.write(data)
 
+        def _send_file(self, path, content_type: str, filename: str, remove_after: bool = False) -> None:
+            try:
+                self.send_response(200)
+                self.send_header("Content-Type", content_type)
+                self.send_header("Content-Length", str(path.stat().st_size))
+                self.send_header("Content-Disposition", f'attachment; filename="{filename}"')
+                self.send_header("Cache-Control", "private, no-store")
+                self.send_header("X-Content-Type-Options", "nosniff")
+                self.end_headers()
+                with path.open("rb") as handle:
+                    for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+                        self.wfile.write(chunk)
+            except (BrokenPipeError, ConnectionResetError):
+                log.info("客户端下载中断 %s", filename)
+            finally:
+                if remove_after:
+                    path.unlink(missing_ok=True)
+
         def do_GET(self):
             path = self.path.split("?", 1)[0]
             if path == "/health":
@@ -153,6 +200,15 @@ def _handler(app: App):
             if path in ("/", "/index.html"):
                 self.wfile.write(self._html_headers())
                 return
+            media_match = re.fullmatch(r"/media/([0-9]{10,25})/video", path)
+            if media_match:
+                if not app.authorized(self.headers.get("Authorization")):
+                    return self._send(401, {"status": "error", "text": "访问密码不对"})
+                cleanup_retained_videos(app.settings)
+                video = retained_video(app.settings, media_match.group(1))
+                if video is None:
+                    return self._send(404, {"status": "error", "text": "原视频未保留或已经过期"})
+                return self._send_file(video, "video/mp4", f"douyin-{media_match.group(1)}{video.suffix.lower()}")
             self._send(404, {"status": "error", "text": "not found"})
 
         def do_HEAD(self):
@@ -171,7 +227,7 @@ def _handler(app: App):
             self.end_headers()
 
         def do_POST(self):
-            if self.path != "/transcribe":
+            if self.path not in ("/transcribe", "/bundle"):
                 return self._send(404, {"status": "error", "text": "not found"})
             if not app.authorized(self.headers.get("Authorization")):
                 return self._send(401, {"status": "error", "text": "口令（token）不对，检查快捷指令里的 Authorization"})
@@ -180,9 +236,20 @@ def _handler(app: App):
                 return self._send(413, {"status": "error", "text": "内容太长"})
             raw = self.rfile.read(length).decode("utf-8", errors="replace")
             try:
-                text = json.loads(raw).get("text", "")
+                body = json.loads(raw)
             except (json.JSONDecodeError, AttributeError):
-                text = raw  # 也接受纯文本 body
+                body = None
+            if self.path == "/bundle":
+                if not isinstance(body, dict):
+                    return self._send(400, {"status": "error", "text": "请求格式不对"})
+                aweme_id = str(body.get("aweme_id") or "")
+                transcript = str(body.get("transcript") or "")
+                try:
+                    bundle = create_workbench_bundle(app.settings, aweme_id, transcript)
+                except (FileNotFoundError, ValueError) as error:
+                    return self._send(404, {"status": "error", "text": str(error)})
+                return self._send_file(bundle, "application/zip", f"douyin-{aweme_id}-workbench.zip", True)
+            text = body.get("text", "") if isinstance(body, dict) else raw
             self._send(200, app.transcribe(str(text)))
 
         def log_message(self, fmt, *args):

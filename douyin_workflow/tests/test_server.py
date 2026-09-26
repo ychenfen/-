@@ -86,6 +86,7 @@ def test_done_also_returns_structured_fields(serve):
         "transcript": "大家好。",
         "backend": "iesdouyin",
         "timing_s": {"download": 1.2, "transcribe": 3.4},
+        "video_available": False,
     }
 
 
@@ -127,6 +128,37 @@ def test_cached_result_served_from_disk(serve):
     assert res["title"] == "旧的" and res["transcript"] == "缓存里的字"
 
 
+def test_authenticated_video_and_bundle_download(serve):
+    base, settings = serve(lambda url: pytest.fail("不该再跑"))
+    d = settings.data_dir / AWEME
+    d.mkdir(parents=True)
+    (d / "video.mp4").write_bytes(b"video-bytes")
+    (d / "meta.json").write_text(
+        json.dumps({"title": "旧的", "author": "a", "duration_s": 3, "share_url": "https://v.douyin.com/x/"}),
+        encoding="utf-8",
+    )
+    (d / "transcript.txt").write_text("缓存里的字", encoding="utf-8")
+    assert post(base, SHARE)["video_available"] is True
+
+    request = urllib.request.Request(f"{base}/media/{AWEME}/video")
+    request.add_header("Authorization", f"Bearer {TOKEN}")
+    with urllib.request.urlopen(request) as response:
+        assert response.read() == b"video-bytes"
+        assert response.headers["Cache-Control"] == "private, no-store"
+
+    body = json.dumps({"aweme_id": AWEME, "transcript": "校对稿"}).encode()
+    request = urllib.request.Request(f"{base}/bundle", data=body, method="POST")
+    request.add_header("Content-Type", "application/json")
+    request.add_header("Authorization", f"Bearer {TOKEN}")
+    with urllib.request.urlopen(request) as response:
+        import io
+        import zipfile
+
+        with zipfile.ZipFile(io.BytesIO(response.read())) as archive:
+            assert archive.read("transcript.txt").decode().strip() == "校对稿"
+            assert archive.read("video.mp4") == b"video-bytes"
+
+
 def test_error_is_reported_and_retry_restarts(serve):
     calls = []
 
@@ -161,9 +193,16 @@ def test_index_page_served():
     threading.Thread(target=srv.serve_forever, daemon=True).start()
     try:
         port = srv.server_address[1]
-        body = urllib.request.urlopen(f"http://127.0.0.1:{port}/").read().decode("utf-8")
+        with urllib.request.urlopen(f"http://127.0.0.1:{port}/") as response:
+            body = response.read().decode("utf-8")
+            assert "default-src 'none'" in response.headers["Content-Security-Policy"]
+            assert response.headers["X-Frame-Options"] == "DENY"
+            assert "__CSP_NONCE__" not in body
         assert "抖音素材台" in body and 'fetch("transcribe"' in body
-        assert all(label in body for label in ("复制纯逐字稿", "下载 TXT", "复制深挖提示词", "最近处理"))
+        assert all(
+            label in body
+            for label in ("复制纯逐字稿", "下载 TXT", "下载原视频", "下载工作台素材包", "复制一键成片提示词", "最近处理")
+        )
 
         req = urllib.request.Request(f"http://127.0.0.1:{port}/", method="HEAD")
         with urllib.request.urlopen(req) as response:

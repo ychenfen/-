@@ -13,7 +13,7 @@ INDEX_HTML = r"""<!doctype html>
 <meta name="theme-color" content="#f3efe5">
 <link rel="icon" href="data:,">
 <title>抖音素材台</title>
-<style>
+<style nonce="__CSP_NONCE__">
   :root {
     --paper:#f3efe5; --card:#fffdf7; --ink:#17211f; --muted:#65706d;
     --line:#d7d2c4; --accent:#006d62; --accent-deep:#004c45; --soft:#dfece7;
@@ -138,7 +138,10 @@ INDEX_HTML = r"""<!doctype html>
       <button class="action strong" id="copyTranscript" type="button">复制纯逐字稿</button>
       <button class="action" id="copyFull" type="button">复制完整信息</button>
       <button class="action" id="download" type="button">下载 TXT</button>
+      <button class="action hidden" id="downloadVideo" type="button">下载原视频</button>
+      <button class="action hidden" id="downloadBundle" type="button">下载工作台素材包</button>
       <button class="action" id="copyResearch" type="button">复制深挖提示词</button>
+      <button class="action full" id="copyWorkbench" type="button">复制一键成片提示词</button>
       <button class="action full" id="again" type="button">继续处理下一条</button>
     </div>
   </section>
@@ -149,7 +152,7 @@ INDEX_HTML = r"""<!doctype html>
   </section>
 </main>
 <div class="toast" id="toast" role="status"></div>
-<script>
+<script nonce="__CSP_NONCE__">
 (function () {
   "use strict";
   var $ = function (id) { return document.getElementById(id); };
@@ -190,6 +193,33 @@ INDEX_HTML = r"""<!doctype html>
     return "请把下面这条短视频当作待核查素材，而不是事实来源。先修正 ASR 里可能识别错的人名、产品名、英文缩写和专有名词，再完成深入研究。\n\n" +
       "要求：\n1. 分开列出：视频原话、可验证事实、营销或推测性主张。\n2. 优先查项目官网、官方公告、论文、代码仓库及当事人原始发言；二手报道只作补充。\n3. 对数字、日期、模型名称、开源状态和能力边界逐项核实。\n4. 找不到可靠证据的内容明确写“未核实”，不要补全或猜测。\n5. 最后说明：这条内容对我的工作流有什么可复用的做法、哪些部分不建议照搬，并给出一个最小验证方案。\n6. 附上可点击来源链接，并标明每个来源支持哪项结论。\n\n素材：\n" + fullText();
   }
+  function workbenchPrompt() {
+    return "请把下面的抖音逐字稿作为待核查的研究素材，接入 touyan-video-workbench。不要照抄原文，也不要把原视频默认视为已获发布授权。\n\n" +
+      "任务：\n1. 先核查观点、数字和时效，列出可靠来源；无法核实的删掉或标注。\n2. 判断更适合 ConceptVideo（30 秒观点短视频）还是 DialogueVideo（师徒对话科普）。\n3. 按对应 SOP 生成 episodes/<id>/episode.json，只改该文件，不绕过 lint。\n4. 保留边界条件、风险和反例，结尾必须有‘个人观点，不构成投资建议’。\n5. 素材包中的视频仅可作内部研究；发布前单独核验版权、肖像和平台规则。\n6. 完成后依次跑 lint、build、check，并人工查看联系表。\n\n素材：\n" + fullText();
+  }
+  function triggerBlob(blob, filename) {
+    var url = URL.createObjectURL(blob); var link = document.createElement("a");
+    link.href = url; link.download = filename; document.body.appendChild(link); link.click();
+    document.body.removeChild(link); setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
+  async function downloadRemote(kind) {
+    if (!current || !current.aweme_id) return;
+    var button = kind === "video" ? $("downloadVideo") : $("downloadBundle");
+    button.disabled = true;
+    try {
+      var options = { headers:{ "Authorization":"Bearer " + savedToken() } };
+      var url = "media/" + current.aweme_id + "/video";
+      if (kind === "bundle") {
+        url = "bundle"; options.method = "POST"; options.headers["Content-Type"] = "application/json";
+        options.body = JSON.stringify({ aweme_id:current.aweme_id, transcript:$("transcript").value.trim() });
+      }
+      var response = await fetch(url, options);
+      if (!response.ok) { var error = await response.json(); throw new Error(error.text || "下载失败"); }
+      triggerBlob(await response.blob(), kind === "video" ? "douyin-" + current.aweme_id + ".mp4" : "douyin-" + current.aweme_id + "-workbench.zip");
+      showToast(kind === "video" ? "原视频开始下载" : "工作台素材包开始下载");
+    } catch (error) { showToast(error.message || "下载失败"); }
+    finally { button.disabled = false; }
+  }
   async function copyText(text, success) {
     try { await navigator.clipboard.writeText(text); showToast(success); }
     catch (e) {
@@ -221,6 +251,8 @@ INDEX_HTML = r"""<!doctype html>
     $("resultMeta").textContent = [data.author, data.duration_s ? data.duration_s + " 秒" : "", data.aweme_id ? "ID " + data.aweme_id : ""].filter(Boolean).join(" · ");
     $("transcript").value = data.transcript || data.text || "";
     $("cacheTag").classList.toggle("hidden", !data.cached);
+    $("downloadVideo").classList.toggle("hidden", !data.video_available);
+    $("downloadBundle").classList.toggle("hidden", !data.video_available);
     $("result").classList.remove("hidden");
     saveHistory(data);
   }
@@ -255,6 +287,9 @@ INDEX_HTML = r"""<!doctype html>
   $("copyTranscript").addEventListener("click", function () { copyText($("transcript").value.trim(), "逐字稿已复制"); });
   $("copyFull").addEventListener("click", function () { copyText(fullText(), "完整信息已复制"); });
   $("copyResearch").addEventListener("click", function () { copyText(researchPrompt(), "深挖提示词已复制"); });
+  $("copyWorkbench").addEventListener("click", function () { copyText(workbenchPrompt(), "一键成片提示词已复制"); });
+  $("downloadVideo").addEventListener("click", function () { downloadRemote("video"); });
+  $("downloadBundle").addEventListener("click", function () { downloadRemote("bundle"); });
   $("download").addEventListener("click", function () {
     var blob = new Blob([fullText() + "\n"], { type:"text/plain;charset=utf-8" }); var url = URL.createObjectURL(blob);
     var link = document.createElement("a"); link.href = url; link.download = cleanFileName(current && current.title) + ".txt";

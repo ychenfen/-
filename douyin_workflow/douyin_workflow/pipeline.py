@@ -19,6 +19,7 @@ import requests
 
 from .config import Settings, get_settings
 from .downloaders import AllBackendsFailed, DownloadChain, UnsupportedContent, build_backends
+from .media import cleanup_retained_videos
 from .share import ShareParseError, resolve
 from .transcribe import TranscribeError, extract_audio, transcribe
 
@@ -77,6 +78,7 @@ def douyin_to_text(share_text: str, force: bool = False, settings: Settings | No
     }
     (item_dir / "transcript.txt").write_text(text, encoding="utf-8")
     (item_dir / "meta.json").write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
+    cleanup_retained_videos(settings)
     return {**meta, "transcript": text, "cached": False}
 
 

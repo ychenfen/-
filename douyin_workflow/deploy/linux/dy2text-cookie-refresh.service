@@ -1,28 +1,28 @@
 [Unit]
-Description=Douyin link to transcript web service
+Description=Refresh anonymous Douyin cookies for dy2text
 After=network-online.target
+Wants=network-online.target
 
 [Service]
+Type=oneshot
 User=ubuntu
+Group=ubuntu
 WorkingDirectory=/home/ubuntu/dy2text
+Environment=PYTHONPATH=/home/ubuntu/dy2text/app
+Environment=PLAYWRIGHT_BROWSERS_PATH=/home/ubuntu/dy2text/playwright-browsers
 EnvironmentFile=/home/ubuntu/dy2text/dy2text.env
-ExecStart=/home/ubuntu/dy2text/venv/bin/python -m douyin_workflow serve --wait 20
-Restart=on-failure
-RestartSec=5
-MemoryMax=1200M
-Nice=5
+ExecStart=/home/ubuntu/dy2text/venv/bin/python -m douyin_workflow.cookie_refresh
 UMask=0077
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=read-only
-ReadWritePaths=/home/ubuntu/dy2text/data
+ReadWritePaths=/home/ubuntu/dy2text/secrets
 ProtectKernelTunables=true
 ProtectKernelModules=true
 ProtectControlGroups=true
 RestrictSUIDSGID=true
 LockPersonality=true
 RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
-
-[Install]
-WantedBy=multi-user.target
+MemoryMax=900M
+TimeoutStartSec=120

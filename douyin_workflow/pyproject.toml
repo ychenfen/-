@@ -19,6 +19,7 @@ asr = ["funasr>=1.1", "modelscope", "torch", "torchaudio"]
 # 轻量转写：小内存云服务器用，配合 DOUYIN_ASR_MODEL=sherpa-sensevoice
 lite = ["sherpa-onnx", "numpy", "imageio-ffmpeg"]
 f2 = ["f2"]
+browser = ["playwright>=1.55,<2"]
 dev = ["pytest"]
 
 [project.scripts]
